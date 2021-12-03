@@ -19,7 +19,7 @@ fn solution1(data:&Vec<usize>, bits:usize) -> usize {
         .fold(0, |res, p| {
             if data.iter().filter(|n| *n & p == 0 ).count() >= data_size / 2 {res + p} else { res }
         });
-    let least = (0..12)
+    let least = (0..bits)
         .map(|n| 1 << n)
         .fold(0, |res, p| {
             if data.iter().filter(|n| *n & p == 0 ).count() < data_size / 2 {res + p} else { res }
