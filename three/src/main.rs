@@ -17,13 +17,13 @@ fn solution1(data:&Vec<usize>, bits:usize) -> usize {
     let most = (0..bits)
         .map(|n| 1 << n)
         .fold(0, |res, p| {
-        if data.iter().filter(|n| *n & p == 0 ).count() >= data_size / 2 {res + p} else { res }
-    });
+            if data.iter().filter(|n| *n & p == 0 ).count() >= data_size / 2 {res + p} else { res }
+        });
     let least = (0..12)
         .map(|n| 1 << n)
         .fold(0, |res, p| {
-        if data.iter().filter(|n| *n & p == 0 ).count() < data_size / 2 {res + p} else { res }
-    });
+            if data.iter().filter(|n| *n & p == 0 ).count() < data_size / 2 {res + p} else { res }
+        });
 
     most * least
 }
