@@ -33,7 +33,7 @@ fn solution2(data:&Vec<usize>, bits:usize) -> usize {
     let mut p = bits ;
     while filtered.len() > 1 {
         p -= 1;
-        let (zeros, ones):(Vec<usize>, Vec<usize>) = filtered.iter().partition(|n| *n & (1 << p) == 0);
+        let (zeros, ones):(Vec<usize>, Vec<usize>) = filtered.into_iter().partition(|&n| n & (1 << p) == 0);
         filtered = if zeros.len() > ones.len() {zeros} else {ones};
     }
     let oxygen = filtered[0];
@@ -42,7 +42,7 @@ fn solution2(data:&Vec<usize>, bits:usize) -> usize {
     let mut p =  bits ;
     while filtered.len() > 1 {
         p -= 1;
-        let (zeros, ones):(Vec<usize>, Vec<usize>) = filtered.iter().partition(|n| *n & (1 << p) == 0);
+        let (zeros, ones):(Vec<usize>, Vec<usize>) = filtered.iter().partition(|&n| n & (1 << p) == 0);
         filtered = if zeros.len() > ones.len() {ones} else {zeros};
     }
     let co2 = filtered[0];
@@ -65,7 +65,7 @@ mod test {
     use super::*;
     #[test]
     fn solution_one(){
-        let data:Vec<usize> = vec!(
+        let data:Vec<usize> = vec![
             0b00100,
             0b11110,
             0b10110,
@@ -78,12 +78,12 @@ mod test {
             0b11001,
             0b00010,
             0b01010
-        );
+        ];
         assert_eq!(solution1(&data, 5), 198);
     }
     #[test]
     fn solution_two(){
-        let data:Vec<usize> = vec!(
+        let data:Vec<usize> = vec![
             0b00100,
             0b11110,
             0b10110,
@@ -96,7 +96,7 @@ mod test {
             0b11001,
             0b00010,
             0b01010
-        );
+        ];
         assert_eq!(solution2(&data, 5), 230);
     }
 }
