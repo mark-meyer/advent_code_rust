@@ -82,9 +82,9 @@ fn get_data<R: Read>(input: R) -> (Vec<i32>, Vec<Board<i32>>) {
 }
 
 fn part_one(numbers:&Vec<i32>, boards:&mut Vec<Board<i32>>) -> i32{
-    for n in numbers {
+    for &n in numbers {
         for board in boards.iter_mut() {
-            board.play(*n);
+            board.play(n);
             if board.winning() {
                 return board.sum_unmarked() * n
             }
@@ -94,18 +94,19 @@ fn part_one(numbers:&Vec<i32>, boards:&mut Vec<Board<i32>>) -> i32{
 }
 
 fn part_two(numbers:&Vec<i32>, boards:&mut Vec<Board<i32>>) -> i32 {
-    for n in numbers {
+    for &n in numbers {
         if boards.len() == 1 {
-            boards[0].play(*n);
+            // Last board. Just play until it wins
+            boards[0].play(n);
             if boards[0].winning() {
                 return boards[0].sum_unmarked() * n
             }
         } else {
             for board in boards.iter_mut() {
-                board.play(*n);            
+                board.play(n);            
             }
         }
-        
+        // remove winning boards
         boards.retain(|board| {
             !board.winning()
         });
