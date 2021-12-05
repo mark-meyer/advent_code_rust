@@ -9,12 +9,16 @@ static PATH: &'static str = "./data.txt";
 
 #[derive(Debug, PartialEq, Clone)]
 enum Square<T:Integer + Copy> {
+    // A Square on a board. It's either Open with a number
+    // or Marked (it's been called)
     Open(T),
     Marked
 }
 
 #[derive(Debug, Clone)]
 struct Board<T:Integer + Copy>  {
+    // I live to hold a bunch of Square Enums
+    // and hang some convient methods on
     squares:Vec<Square<T>>
 }
 
@@ -25,6 +29,7 @@ impl<T:Integer + Copy> Board<T> {
         }
     }
     fn play(&mut self, n:T) {
+        // Converts square to Marked when n is on the board.
         for square in self.squares.iter_mut() {
             if let Square::Open(m) = square {
                 if *m == n {
@@ -43,6 +48,7 @@ impl<T:Integer + Copy> Board<T> {
         rows || col
     }
     fn sum_unmarked(&self) -> T {
+        // Sum all still Open squares
         let mut sum = T::zero();
         for square in &self.squares {
             if let Square::Open(n) = square {
@@ -110,7 +116,6 @@ fn part_two(numbers:&Vec<i32>, boards:&mut Vec<Board<i32>>) -> i32 {
         boards.retain(|board| {
             !board.winning()
         });
-        
     }
     panic!("No winning boards");
 }
