@@ -6,7 +6,7 @@ static PATH: &'static str = "./data.txt";
 
 fn parse_file(path: &str) -> Vec<usize> {
     let path = Path::new(path);
-    let data = fs::read_to_string(path).expect("The laternfish ate you data file");
+    let data = fs::read_to_string(path).expect("The laternfish ate your data file");
     data.trim().split(',').map(|n| n.parse().unwrap()).collect()
 }
 
