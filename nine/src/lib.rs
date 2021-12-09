@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use rayon::prelude::*;
 
 pub type Matrix = Vec<Vec<u8>>;
 
@@ -91,7 +92,12 @@ fn low_points(data: &Matrix) -> (usize, Vec<Point>){
 pub fn solutions(matrix: &Matrix) -> (usize, usize) {
     let (sum, wells) = low_points(&matrix);
     
-    let mut total:Vec<usize> = wells.iter().map(|p| dfs(&matrix, p)).collect();
+    //use Rayon to run DFS in threads.
+    let mut total:Vec<usize> = wells.par_iter().map(|p| dfs(&matrix, p)).collect();
+
+    // alternatively, don't us rayon's theads:
+    //let mut total:Vec<usize> = wells.iter().map(|p| dfs(&matrix, p)).collect();
+
     total.sort_by(|a, b| b.cmp(a));
     let top = total[..3].iter().fold(1, |a, n| a * n);
     (sum, top)
