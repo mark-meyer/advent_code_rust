@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::collections::BinaryHeap;
 use rayon::prelude::*;
 
 pub type Matrix = Vec<Vec<u8>>;
@@ -65,41 +66,42 @@ fn dfs(m: &Matrix, start: &Point) -> usize {
     count
 }
 
-fn low_points(data: &Matrix) -> (usize, Vec<Point>){
+fn low_points(line: &[u8], y:usize,  data: &Matrix) -> (usize, Vec<Point>){
     let h = data.len();
     let w = data[0].len();
     let mut sum: usize = 0;
     let mut points = Vec::new();
 
-    for (y, line) in data.iter().enumerate() {
-        for (x, n) in line.iter().enumerate() {
-            let p = Point::new(x, y);
-            let smallest_neighbor = get_neighbors(&p, h, w)
-                .iter()
-                .map(|p| data[p.y][p.x])
-                .min()
-                .unwrap();
+    for (x, n) in line.iter().enumerate() {
+        let p = Point::new(x, y);
+        let smallest_neighbor = get_neighbors(&p, h, w)
+            .iter()
+            .map(|p| data[p.y][p.x])
+            .min()
+            .unwrap();
 
-            if n < &smallest_neighbor {
-                points.push(p);
-                sum += 1 + *n as usize
-            }
+        if n < &smallest_neighbor {
+            points.push(p);
+            sum += 1 + *n as usize
         }
     }
 
     (sum, points)
 }
 pub fn solutions(matrix: &Matrix) -> (usize, usize) {
-    let (sum, wells) = low_points(&matrix);
+    //use Rayon to run low-point search and DFS in threads.
+    let (sum, wells) = matrix
+        .par_iter()
+        .enumerate()
+        .map(|(idx, line)| low_points(line, idx, &matrix))
+        .reduce(|| (0, Vec::new()), |tup, (sum, wells)| (tup.0 + sum, [tup.1, wells].concat()));    
     
-    //use Rayon to run DFS in threads.
-    let mut total:Vec<usize> = wells.par_iter().map(|p| dfs(&matrix, p)).collect();
+    let total:BinaryHeap<usize> = wells
+        .par_iter()
+        .map(|p| dfs(&matrix, p))
+        .collect();
 
-    // alternatively, don't us rayon's theads:
-    //let mut total:Vec<usize> = wells.iter().map(|p| dfs(&matrix, p)).collect();
-
-    total.sort_by(|a, b| b.cmp(a));
-    let top = total[..3].iter().fold(1, |a, n| a * n);
+    let top = total.iter().take(3).fold(1, |a, n| a * n);
     (sum, top)
 }
 
