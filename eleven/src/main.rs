@@ -41,15 +41,15 @@ fn get_neighbors(p: (usize, usize), grid: &Array2<u32>) -> Vec<(usize, usize)>{
 }
 
 fn flash(grid: &mut Array2<u32>) -> usize {
+    let mut seen:HashSet<(usize, usize)> = HashSet::from_iter(get_flashing_index(grid));
+
     let mut init_flashes = VecDeque::from(get_flashing_index(grid));
     let mut flash_count: usize = init_flashes.len();
-    let mut seen:HashSet<(usize, usize)> = HashSet::new();
-    for coord in &init_flashes {
-        seen.insert(coord.clone());
-    }
+    //for coord in &init_flashes {
+    //    seen.insert(coord.clone());
+    //}
     while !init_flashes.is_empty() {
         let next = init_flashes.pop_front().unwrap();
-        seen.insert(next.clone());
         for coord in get_neighbors(next, &grid) {
             if seen.contains(&coord) {continue}
             
