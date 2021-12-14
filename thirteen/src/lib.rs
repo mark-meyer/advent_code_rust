@@ -73,3 +73,27 @@ impl<'a, I:Iterator<Item=&'a str>> From<I> for Point {
     }
 }
 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_transform_x(){
+        let p: Point = Point{x: 6, y: 10}; 
+        let fold = ('x', 4);
+        let transformed = p.transform_on_axis(&fold);
+        assert_eq!(transformed, Point{x:2, y:10});
+
+        let p = Point{x: 6, y: 10}; 
+        let fold = ('y', 7);
+        let transformed = p.transform_on_axis(&fold);
+        assert_eq!(transformed, Point{x:6, y:4})
+    }
+
+    #[test]
+    fn test_str_parse() {
+        let p = "4,5".split(',');
+        let point = Point::from(p);
+        assert_eq!(point, Point{x:4, y:5});
+    }
+}
