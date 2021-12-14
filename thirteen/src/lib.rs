@@ -63,6 +63,7 @@ impl Point {
 }
 
 /// Convenience method to make a point from an interator of strings
+/// for displaying the code.
 impl<'a, I:Iterator<Item=&'a str>> From<I> for Point {
     fn from(mut pair: I) -> Self {
         Self {
