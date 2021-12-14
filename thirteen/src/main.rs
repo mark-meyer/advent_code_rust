@@ -17,9 +17,14 @@ fn main() {
     let count:HashSet<&Point> = HashSet::from_iter(points.iter());
     println!("Solution 1: {}", count.len());
 
+    // For each point in the input
+    // transform it along the correct axis
     let points:Vec<Point> = points.into_iter()
         .map(|point| folds[1..].iter()
             .fold(point, |p, fold| p.transform_on_axis(fold))).collect();
 
-    println!("Solution 2: \n{}", make_strings(&points).join("\n"));
+    // Once all points are processed for all folds, figure out 
+    // where they are on the paper and print
+    let output = make_strings(&points).join("\n");
+    println!("Solution 2: \n{}", output);
 }
