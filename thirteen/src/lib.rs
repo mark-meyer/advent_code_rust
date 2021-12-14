@@ -1,5 +1,7 @@
 
+///
 /// Parse input data into Points and tuples of char, int like: ('x', 7)
+/// 
 pub fn parse_data(data: &str) -> (Vec<Point>, Vec<(char, usize)>) {
     let (points, flips) = data.split_once("\n\n").unwrap();
 
@@ -19,7 +21,9 @@ pub fn parse_data(data: &str) -> (Vec<Point>, Vec<(char, usize)>) {
     (points, flips)
 }
 
+///
 /// Convert a list of points into a list of strings
+/// 
 pub fn make_strings(points:&Vec<Point>) -> Vec<String>{
     let x_max = points.iter().map(|p| p.x).max().unwrap() + 1;
     let y_max = points.iter().map(|p| p.y).max().unwrap() + 1;
@@ -34,6 +38,9 @@ pub fn make_strings(points:&Vec<Point>) -> Vec<String>{
     .collect()
 }
 
+///
+/// Point Struct and methods
+/// 
 #[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Point {
     pub x: usize,
@@ -55,6 +62,7 @@ impl Point {
     }
 }
 
+/// Convenience method to make a point from an interator of strings
 impl<'a, I:Iterator<Item=&'a str>> From<I> for Point {
     fn from(mut pair: I) -> Self {
         Self {
