@@ -23,6 +23,7 @@ pub fn parse_data(data: &str) -> (Vec<Point>, Vec<(char, usize)>) {
 
 ///
 /// Convert a list of points into a list of strings
+/// for displaying the code.
 /// 
 pub fn make_strings(points:&Vec<Point>) -> Vec<String>{
     let x_max = points.iter().map(|p| p.x).max().unwrap() + 1;
@@ -63,7 +64,6 @@ impl Point {
 }
 
 /// Convenience method to make a point from an interator of strings
-/// for displaying the code.
 impl<'a, I:Iterator<Item=&'a str>> From<I> for Point {
     fn from(mut pair: I) -> Self {
         Self {
