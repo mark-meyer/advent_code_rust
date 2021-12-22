@@ -3,12 +3,6 @@ use std::collections::HashMap;
 type MemoTable = HashMap<((u8, u8), (u8, u8)), (u64, u64)>;
 type Player = (u8, u8);
 
-fn update(player: Player, roll:u8) -> (u8, u8) {
-    let (pos, score) = player;
-    let pos = (pos - 1  + roll) % 10 + 1;
-    (pos, score + pos)
-}
-
 const THREE_ROLL_PERMUTATIONS:[(u8, u8); 7] = [
     (3, 1),
     (4, 3),
@@ -19,13 +13,19 @@ const THREE_ROLL_PERMUTATIONS:[(u8, u8); 7] = [
     (9, 1)
 ];
 
-fn game(player1:Player, player2:Player, memo:&mut MemoTable) -> (u64, u64) {
+fn update(player: Player, roll:u8) -> (u8, u8) {
+    let (pos, score) = player;
+    let pos = (pos - 1  + roll) % 10 + 1;
+    (pos, score + pos)
+}
+
+fn game(player1:Player, player2:Player, memo: &mut MemoTable) -> (u64, u64) {
     let mut p1_wins:u64 = 0;
     let mut p2_wins:u64 = 0;
 
     for (roll, count) in THREE_ROLL_PERMUTATIONS {
         let (pos, score) = update(player1, roll);
-        if score >= 21{
+        if score >= 21 {
             p1_wins += count as u64;
         } else {
             match memo.get(&(player2,(pos, score))) {
@@ -42,7 +42,6 @@ fn game(player1:Player, player2:Player, memo:&mut MemoTable) -> (u64, u64) {
             }
         }
     } 
-    
     (p1_wins, p2_wins)
 }
 
