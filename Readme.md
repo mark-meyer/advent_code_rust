@@ -1,4 +1,4 @@
-# Advent of Code (some of) 2021 (and some 2022)
+# Advent of Code
 
 ### Rust
 
