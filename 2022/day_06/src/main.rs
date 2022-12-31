@@ -6,15 +6,17 @@ static DATA:&str = "data.txt";
 
 fn find_first_marker(s:&str, marker_size:usize) -> usize {
     let tokens:Vec<char> = s.chars().collect();
+    let mut h = HashSet::<char>::with_capacity(marker_size);
 
     for (i, w) in tokens.windows(marker_size).enumerate() {
-        let h:HashSet<_> = HashSet::from_iter(w);
+        h.extend(w);
         if h.len() == marker_size {
             return i + marker_size
         }
+        h.clear()
     }
 
-    0
+    panic!("No marker found!")
 }
 
 fn main() {
