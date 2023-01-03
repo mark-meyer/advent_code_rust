@@ -5,6 +5,7 @@ use std::io::{BufReader, BufRead};
 static DATA:&str = "data.txt";
 
 type ViewScape = Vec<Option<u32>>;
+
 struct Forest {
     rows: Vec<Vec<u32>>,
     cols: Vec<Vec<u32>>,
@@ -47,13 +48,8 @@ fn transpose(v: &Vec<Vec<u32>>) -> Vec<Vec<u32>> {
     let mut iters: Vec<_> = v.iter().map(|n| n.iter()).collect();
 
     (0..len)
-        .map(|_| {
-            iters
-                .iter_mut()
-                .map(|n| *n.next().unwrap())
-                .collect()
-        })
-        .collect()
+    .map(|_| {iters.iter_mut().map(|n| *n.next().unwrap()).collect() })
+    .collect()
 }
 
 fn index_greater<'a, I>(tree_height: &u32, view:I) -> Option<u32>
@@ -113,7 +109,6 @@ fn part_two(forest: &Forest) -> u32 {
             }
         }
     }
-
     max as u32
 }
 fn main() {
