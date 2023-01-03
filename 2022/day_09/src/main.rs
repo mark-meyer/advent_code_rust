@@ -5,7 +5,6 @@ use std::boxed::Box;
 use std::collections::HashSet;
 use crate::point::Point;
 
-
 mod point;
 
 static DATA: &str  = "data.txt";
@@ -24,7 +23,7 @@ impl RopeSegment {
             Some(self.position.clone())
         }
     }
-    
+
     fn follow(&mut self, leader_pos: &Point) -> Option<Point>{
         if !self.position.touching(leader_pos) {
             self.go(self.position.direction(leader_pos))
