@@ -16,6 +16,8 @@ struct RopeSegment {
 
 impl RopeSegment {
     fn go(&mut self, direction: Point) -> Option<Point> {
+        // Returns the position the last follower
+        // is in if it moved, otherwise None
         self.position = &self.position + &direction;
         if let Some(f) = &mut self.follower {
             f.follow(&self.position)
@@ -48,6 +50,8 @@ fn run_sim(head: &mut RopeSegment, f: File) -> usize {
             _ => panic!("bad input")
         };
         let count = count.parse().expect("can't parse number!");
+        // moving the head will return Some(Position) if the tail moved
+        // or None if it didn't. 
         seen.extend((0..count).flat_map(|_| head.go(dir)));
     }
     seen.len()
