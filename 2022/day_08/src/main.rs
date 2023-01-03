@@ -26,7 +26,8 @@ impl Forest {
         /*
         Returns a vector of Options containing the distance until the first blocking
         tree looking left, right, up, and down.
-        The Option will be None if you can see all the way to the edge
+        A particualr Option will be None if you can see all the way to the
+        edge in that direction.
         */
         let n = self.rows[row][column];
         vec![
