@@ -78,23 +78,14 @@ fn parse_monkey(s: &str) -> Monkey {
     }
 }
 
-fn top_2(v: &Vec<RefCell<Monkey>>) ->(u64, u64) {
-    v.iter().map(|m| m.borrow().inspect_count).fold((0, 0), |t, c| {
-        match c {
-            c if c >= t.0 => (c, t.0),
-            c if c > t.1 => (t.0, c),
-            _ => t
-        }
-    })
-}
 fn main() {
     let path = Path::new(DATA);
     let text = fs::read_to_string(path).expect("can't read the file!");
     
     /*
-         Part One
+        Part One
     */
-    let monkeys:Vec<RefCell<Monkey>> = text.split("\n\n").map(|l| RefCell::new(parse_monkey(l))).collect();
+    let mut monkeys:Vec<RefCell<Monkey>> = text.split("\n\n").map(|l| RefCell::new(parse_monkey(l))).collect();
  
     for _ in 0..20 {
         for monkey in &monkeys {
@@ -106,28 +97,32 @@ fn main() {
         }
     }
 
-    let top:(u64, u64) = top_2(&monkeys);
-
-    println!("Part One: {}", top.0 * top.1 );
+    monkeys.sort_by_key(|m| m.borrow().inspect_count);
+    monkeys.reverse();
+    let top:u64 = monkeys.iter().map(|m| m.borrow().inspect_count).take(2).product();
+    
+    println!("Part One {}", top);
 
     /* 
         Part Two
     */
-    let monkeys:Vec<RefCell<Monkey>> = text.split("\n\n").map(|l| RefCell::new(parse_monkey(l))).collect();
+    let mut monkeys:Vec<RefCell<Monkey>> = text.split("\n\n").map(|l| RefCell::new(parse_monkey(l))).collect();
     let modulus:u64 = monkeys.iter().map(|m| m.borrow().modulus).product();
     
     for _ in 0..10000 {
         for monkey in &monkeys {
             let mut m = monkey.borrow_mut();
-            m.div = 1;
+            m.div = 1; // don't divide by three
             while let Some((to, val)) = m.next() {
                 let mut m2 = monkeys[to].borrow_mut();
-                m2.items.push(val % modulus)
+                m2.items.push(val % modulus) // control size
             }        
         }
     }
-    
-    let top:(u64, u64) = top_2(&monkeys);
-    println!("Part Two: {}", top.0 * top.1 );
-    
+
+    monkeys.sort_by_key(|m| m.borrow().inspect_count);
+    monkeys.reverse();
+    let top:u64 = monkeys.iter().map(|m| m.borrow().inspect_count).take(2).product();
+    println!("Part Two {}", top);
+
 }
