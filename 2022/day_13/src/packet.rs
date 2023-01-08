@@ -1,7 +1,5 @@
-use serde_json::Value;
 use std::cmp::Ordering;
 use std::iter::zip;
-use serde_json::Value::{Number, Array};
 use crate::Packet::*;
 use std::str::FromStr;
 
@@ -18,27 +16,37 @@ impl FromStr for Packet {
     type Err = ParsePacketError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match serde_json::from_str(s) {
-            Ok(v) =>  Ok(Packet::from_serde_value(&v)?),
-            Err(_) => Err(ParsePacketError)
+        let mut it = s.chars().peekable();
+        let mut stack = vec![];
+
+        while let Some(c) =  it.next() {
+            if c  == '[' {
+                stack.push(List(vec![]));
+            }
+            if c == ']' {
+                let last = stack.pop().ok_or(ParsePacketError)?;
+                match stack.last_mut() {
+                    Some(List(l)) => l.push(last),
+                    None => stack.push(last),
+                    _ => return Err(ParsePacketError)
+                }
+            }
+            if c.is_digit(10) {
+                let mut n = c.to_string();
+                while let Some(d) =  it.next_if(|d| d.is_digit(10)) {
+                    n.push(d)
+                }
+                // naked INTs are not allowed - packets are always lists
+                if let List(l) = stack.last_mut().ok_or(ParsePacketError)? {
+                    l.push(Int(n.parse().unwrap()));
+                }
+            }
         }
+        stack.pop().ok_or(ParsePacketError)
+
     }
 }
 
-impl Packet {
-    fn from_serde_value(v: &Value) -> Result<Self, ParsePacketError> {
-        match v {
-            Number(_) => Ok(Int(v.as_u64().unwrap() as usize)),
-            Array(_) => {
-                match v.as_array().unwrap().iter().map(|val| Packet::from_serde_value(val)).collect() {
-                    Ok(c) => Ok(List(c)),
-                    Err(_) => Err(ParsePacketError)
-                }
-            },
-            _ => panic!("Not a packet!")
-        }    
-    }
-}
 
 impl PartialEq for Packet {
     fn eq(&self, other: &Self) -> bool {
