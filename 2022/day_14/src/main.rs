@@ -47,11 +47,12 @@ fn main() {
     /* 
         Part One 
     */
+
     let mut rocks:HashSet<Point> = parse_file(p);
     let max_y = rocks.iter().map(|r| r.y).max().unwrap();
     let mut count: u32 = 0;
-    let mut last_positions = vec![Point::new(500, 0)];
-    let mut start_pos = last_positions.pop().unwrap();
+    let mut last_positions:Vec<Point> = Vec::new();
+    let mut start_pos = Point::new(500, 0);
 
     while let Some(p) = drop_sand(start_pos, true, &rocks, &mut last_positions, max_y) {
         rocks.insert(p);
