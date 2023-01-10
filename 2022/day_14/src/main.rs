@@ -2,7 +2,7 @@ use std::path::Path;
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 use std::collections::HashSet;
-use crate::point::Point;
+use point::Point;
 
 mod point;
 

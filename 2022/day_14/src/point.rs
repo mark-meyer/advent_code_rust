@@ -8,7 +8,7 @@ pub struct Point {
 
 impl Point {
     pub fn new(x: usize, y: usize) -> Point {
-        Point {x: x, y: y}
+        Point {x, y}
     }
 
     fn line(&self, other: &Point) -> Vec<Point> {
