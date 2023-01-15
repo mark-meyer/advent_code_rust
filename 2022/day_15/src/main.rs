@@ -27,7 +27,6 @@ impl Interval {
         } else {
             (Some(self), Some(other))
         }
-
     }
 }
 
@@ -102,19 +101,21 @@ fn parse_file(p: &Path) -> Vec<Sensor> {
     let buffer = BufReader::new(f);
 
     let re = Regex::new(r"(-?\d+)").unwrap();
-    let mut res = Vec::new();
 
-    for line in buffer.lines() {
-        let l = line.unwrap();
-        let coords = re.find_iter(&l)
-        .flat_map(|digits| digits.as_str().parse().ok())
-        .collect::<Vec<i64>>();
+    buffer.lines()
+        .map(|line| {
+            let l = line.unwrap();
 
-        let sensor = Point::new(coords[0], coords[1]);
-        let beacon = Point::new(coords[2], coords[3]);
-        res.push( Sensor::new(sensor, beacon));
-    }
-    res
+            let coords = re.find_iter(&l)
+            .flat_map(|digits| digits.as_str().parse().ok())
+            .collect::<Vec<i64>>();
+
+            let sensor = Point::new(coords[0], coords[1]);
+            let beacon = Point::new(coords[2], coords[3]);
+
+            Sensor::new(sensor, beacon)
+            })
+        .collect()
 }
 
 fn main() {
