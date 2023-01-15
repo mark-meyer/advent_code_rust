@@ -37,12 +37,12 @@ struct Sensor {
 }
 
 impl Sensor {
-    fn new(sensor: Point, beacon: Point) -> Sensor {
-        let reach = sensor.dist(&beacon);
-        Sensor { pos: sensor, reach }
+    fn new(pos: Point, beacon: Point) -> Sensor {
+        let reach = pos.dist(&beacon);
+        Sensor { pos, reach }
     }
     fn coverage_at_row(&self, row: i64) -> Option<Interval> {
-        // The set of columns covered at row
+        // The interval of columns covered at row
         let y_dist = (self.pos.y - row).abs() as u64;
         if y_dist > self.reach {
             None
@@ -52,7 +52,7 @@ impl Sensor {
         }
     }
 }
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq)]
 struct Point {
     x: i64,
     y: i64
@@ -120,14 +120,14 @@ fn parse_file(p: &Path) -> Vec<Sensor> {
 
 fn main() {
     let p = Path::new(DATA);
-
     let sensors = parse_file(p);
 
     /*
         Part One
         A lot of this is wasted work since the coverage has no holes
         We could just take the minimum start and maximum end...
-     */
+    */
+
     let y = 2000000;
 
     let mut ranges:Vec<Interval> = sensors
