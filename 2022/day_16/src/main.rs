@@ -99,9 +99,8 @@ fn max_tour(distances: &DistMatrix, flows: &Vec<u32>, time:u32) -> u32 {
     let mut seen:HashSet<State> = HashSet::new();
     let mut q:VecDeque<State> = VecDeque::from([state]);
     let mut best = 0;
-    let mut count: u64 = 0;
+
     while let Some(s) = q.pop_front() {
-        count += 1;
         if s.flow > best {
             best = s.flow
         }
@@ -120,14 +119,13 @@ fn max_tour(distances: &DistMatrix, flows: &Vec<u32>, time:u32) -> u32 {
 
                 let state = State {pos: n as u32, valves, flow, time: s.time - d };
 
-                if !seen.contains(&State{flow:0, ..state}) {
+                if !seen.contains(&state) {
                     q.push_back(state);
-                    seen.insert(State{flow:0, ..state});
+                    seen.insert(state);
                 }
             }
         }
     }
-    println!("count {}", count);
     best
 }
 
