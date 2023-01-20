@@ -1,4 +1,4 @@
-use std::collections::{VecDeque, HashSet, HashMap};
+use std::collections::{VecDeque, HashMap};
 use crate::graph::DistMatrix;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -12,7 +12,6 @@ pub struct State {
 
 pub fn max_tour(distances: &DistMatrix, state: State, flows: &Vec<u16>) -> HashMap<u16, u16> {
 
-    let mut seen:HashSet<State> = HashSet::new();
     let mut q:VecDeque<State> = VecDeque::from([state]);
     let mut maxes:HashMap<u16, u16> = HashMap::new();
 
@@ -34,11 +33,9 @@ pub fn max_tour(distances: &DistMatrix, state: State, flows: &Vec<u16>) -> HashM
                 let state = State {pos: n as u16, valves, flow, time: s.time - d };
 
                 let m = maxes.get(&state.valves).cloned().unwrap_or_default();
-                maxes.insert(state.valves, m.max(flow));
-
-                if !seen.contains(&state) {
+                if flow > m {
+                    maxes.insert(state.valves, m.max(flow));
                     q.push_back(state);
-                    seen.insert(state);
                 }
             }
         }
