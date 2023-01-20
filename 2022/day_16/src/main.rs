@@ -56,8 +56,8 @@ fn main() {
     // and find the largest sum
     for (k1, v1) in maxes.iter() {
         for (k2, v2) in maxes.iter() {
-            if  k1 & k2 == 0 && v1 + v2 > max {
-                max = v1 + v2;
+            if  k1 & k2 == 0  {
+                max = max.max(v1 + v2);
             }
         }
     }
