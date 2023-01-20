@@ -31,7 +31,6 @@ pub fn max_tour(distances: &DistMatrix, state: State, flows: &Vec<u16>) -> HashM
                 let flow = (s.time - d) * flows[n] + s.flow;
                 // turn on the valve
                 let valves = s.valves | (1 << n);
-
                 let state = State {pos: n as u16, valves, flow, time: s.time - d };
 
                 let m = maxes.get(&state.valves).cloned().unwrap_or_default();

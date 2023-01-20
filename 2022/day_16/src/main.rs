@@ -52,7 +52,7 @@ fn main() {
 
     let mut max = 0;
 
-    // look at combinations of valves that have non in common
+    // look at combinations of valves that have no valves in common
     // and find the largest sum
     for (k1, v1) in maxes.iter() {
         for (k2, v2) in maxes.iter() {
