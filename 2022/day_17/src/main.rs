@@ -50,22 +50,16 @@ impl Room {
 
             if pos == 0 { break }
 
-            if  pos > top  {
-                // don't bother with logic if we are above top
-                pos -= 1;
-                continue
-            }
-
-            // slice of the room one step below
-            let slice_below = if top > 0 {
-                &self.blocks[pos-1..pos+overlap]
-            } else {
-                &[]
-            };
-
-            // stop when we are about to hit something below us
-            if block.intersects(slice_below) {
-                break
+            if  pos <= top  {
+                // slice of the room one step below
+                let slice_below = if top > 0 {
+                    &self.blocks[pos-1..pos+overlap]
+                } else {
+                    &[]
+                };
+                if block.intersects(slice_below) {
+                    break
+                }
             }
             pos -= 1;
         }
