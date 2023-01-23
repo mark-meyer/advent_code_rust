@@ -17,18 +17,9 @@ static BLOCKS: [&[u8]; 5] = [
 ];
 
 
-struct Room {
-    blocks: Vec<u8>,
-}
+struct Room { blocks: Vec<u8> }
 
 impl Room {
-    fn new() -> Room {
-        Room {
-            blocks: vec![],
-        }
-    }
-
-
     fn drop_block(&mut self,  mut block: Block, mut jets:  impl Iterator<Item=Jet>) {
         let top = self.blocks.len();
         let mut pos = top + 3;
@@ -82,7 +73,7 @@ fn main() {
     let mut jets = input.chars().map(Jet::from).cycle();
 
     let blocks = BLOCKS.iter().map(|b| Block {rows: b.to_vec()}).cycle();
-    let mut room = Room::new();
+    let mut room = Room {blocks: vec![]};
 
     for block in blocks.take(2022) {
         room.drop_block(block, &mut jets);
