@@ -1,6 +1,5 @@
 use crate::jet::Jet;
 
-
 pub struct Block {
     pub rows: Vec<u8>
 }
@@ -8,6 +7,10 @@ pub struct Block {
 impl Block {
     pub fn len(&self) -> usize {
         self.rows.len()
+    }
+
+    pub fn sum(&self) -> u8 {
+        self.rows.iter().sum()
     }
 
     pub fn intersects(&self, other: &[u8]) -> bool {
