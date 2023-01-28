@@ -21,6 +21,7 @@ fn get_extents(cubes: &HashSet<Point>) -> (Point, Point) {
 
 fn bfs(min: &Point, max: &Point, cubes: &HashSet<Point>) -> usize {
     let mut q = VecDeque::from([min.clone()]);
+
     let mut seen:HashSet<Point> = HashSet::new();
     let mut face_count = 0;
 
@@ -36,7 +37,6 @@ fn bfs(min: &Point, max: &Point, cubes: &HashSet<Point>) -> usize {
             }
         }
     }
-
     face_count
 }
 
@@ -53,6 +53,4 @@ fn main() {
     let (min, max)  = get_extents(&cubes);
     let spaces = bfs(&min, &max, &cubes);
     println!("Part two: {}", spaces);
-
-
 }

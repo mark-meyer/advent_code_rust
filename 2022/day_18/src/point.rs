@@ -2,6 +2,15 @@ use std::hash::Hash;
 use std::ops::{Add, Sub};
 use std::collections::HashSet;
 
+static OFFSETS: [[i32; 3]; 6] = [
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1],
+    [-1, 0, 0],
+    [0, -1, 0],
+    [0, 0, -1]
+];
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub struct Point {
     pub x: i32,
@@ -14,15 +23,7 @@ impl Point {
         Point {x, y, z}
     }
     pub fn neighbors(&self) -> HashSet<Point>{
-        let offsets = [
-            [1, 0, 0],
-            [0, 1, 0],
-            [0, 0, 1],
-            [-1, 0, 0],
-            [0, -1, 0],
-            [0, 0, -1]
-        ];
-        offsets.iter().map(|p| self + &Point { x: p[0], y:p[1], z:p[2]} ).collect()
+        OFFSETS.iter().map(|p| self + &Point { x: p[0], y:p[1], z:p[2]} ).collect()
     }
 
     pub fn inside(&self, min_extent:&Self, max_extent:&Self) -> bool {
