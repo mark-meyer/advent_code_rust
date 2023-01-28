@@ -56,7 +56,7 @@ impl Room {
             }
             pos -= 1;
         };
-        // Merge overlsp
+        // Merge overlap
         if overlap == 0 {
             self.blocks.extend(block.rows.iter());
         } else {
