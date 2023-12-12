@@ -14,20 +14,20 @@ pub struct Bounds {
     y1: usize
 }
 
-fn find_symbols_in_bounds(matrix: &Vec<&str>, b: &Bounds) -> Vec<Symbol>{
+fn find_symbols_in_bounds(matrix: &[&str], b: &Bounds) -> Vec<Symbol>{
     let mut symbols:Vec<Symbol> = Vec::new();
 
-    for (row, line) in matrix[b.y0..b.y1].iter().enumerate(){
-        for (col, c) in line[b.x0..b.x1].char_indices(){
+    for (row, line) in matrix.iter().enumerate().take(b.y1).skip(b.y0){
+        for (col, c) in line.chars().enumerate().take(b.x1).skip(b.x0) {
             if !c.is_ascii_digit() && c!='.' {
-                symbols.push(Symbol { value: c, row: row+b.y0, col: col + b.x0 })  
+                symbols.push(Symbol { value: c, row: row, col: col })  
             }
         }
     }
     symbols
 }
 
-pub fn find_symbols(matrix: &Vec<&str>) -> HashMap<Symbol, Vec<u32>>{
+pub fn find_symbols(matrix: &[&str]) -> HashMap<Symbol, Vec<u32>>{
     let mut symbol_lookup = HashMap::new();
     let re = Regex::new(r"\d+").unwrap();
 
@@ -48,7 +48,7 @@ pub fn find_symbols(matrix: &Vec<&str>) -> HashMap<Symbol, Vec<u32>>{
         }
         
     }
-    return symbol_lookup
+    symbol_lookup
 }
 
 pub fn part_one(data: &Vec<&str>) -> u32 {
@@ -80,6 +80,7 @@ mod tests{
         let bounds = Bounds { x0:1, y0:0, x1:4,y1:3};
 
         let s = find_symbols_in_bounds(&lines, &bounds);
+        println!("{:?}", s);
         assert_eq!(s.len(), 2);
         assert_eq!(s[0].row, 0);
         assert_eq!(s[0].col, 2);
