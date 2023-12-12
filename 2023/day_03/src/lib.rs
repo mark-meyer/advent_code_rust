@@ -14,15 +14,6 @@ pub struct Bounds {
     y1: usize
 }
 
-pub fn parse_lines<I, S>(lines: I) -> Vec<String> 
-    where 
-    I: Iterator<Item=S>,
-    S: AsRef<str>
-{
-    lines
-    .map(|line| line.as_ref().to_owned())
-    .collect()
-}
 fn find_symbols_in_bounds(matrix: &Vec<&str>, b: &Bounds) -> Vec<Symbol>{
     let mut symbols:Vec<Symbol> = Vec::new();
 
@@ -78,18 +69,6 @@ pub fn part_two(data: &Vec<&str>) -> u32 {
 #[cfg(test)]
 mod tests{
     use super::*;
-
-    #[test]
-    fn test_parse(){
-        let lines = vec![
-            "467..114..",
-            "...*......"
-        ];
-        let parsed = parse_lines(lines.iter());
-        assert_eq!(parsed.len(), 2);
-        assert_eq!(parsed[0], "467..114..");
-        assert_eq!(parsed[1], "...*......");
-    }
 
     #[test]
     fn test_find_symbols_in_bounds() {
