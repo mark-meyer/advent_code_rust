@@ -1,5 +1,3 @@
-extern crate day_05;
-
 use day_05::{part_one, part_two, parse_input};
 
 #[test]
