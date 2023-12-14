@@ -49,7 +49,7 @@ impl Interval {
             (None, vec![self.clone()])
         } else {
             let mut remainders = Vec::new();
-            let start =  self.start.max(conversion.interval.start);
+            let start = self.start.max(conversion.interval.start);
             let stop = self.stop.min(conversion.interval.stop);
             
             let converted: Interval = Interval {
@@ -108,8 +108,8 @@ pub fn part_one(seeds: &Vec<i64>, conversions: &Vec<Vec<Conversion>>) -> Option<
 
 pub fn part_two(seeds: &Vec<i64>, conversions: &Vec<Vec<Conversion>>) -> Option<i64>{
     let mut seed_ranges = Interval::interval_list_from_seeds(seeds);
-    let mut converted: Vec<_>;
-    let mut leftovers: Vec<_>;
+    let mut converted: Vec<Interval>;
+    let mut leftovers: Vec<Interval>;
     for conversion in conversions {
         converted = vec![];
         leftovers = vec![];
