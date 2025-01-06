@@ -113,6 +113,6 @@ fn main() {
             }
         }
     }
-    println!("Part two: {}", found2);
 
+    println!("Part two: {}", found2);
 }
