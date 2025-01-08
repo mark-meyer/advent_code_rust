@@ -1,13 +1,13 @@
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::collections::{HashSet, HashMap};
 use rayon::prelude::*;
+use ahash::{AHashSet, AHashMap};
 
 use day_06::*;
 
-fn parse_input(f:File) -> (Point, Point, HashSet<Point>){
-    let mut blocks:HashSet<Point> = HashSet::new();
+fn parse_input(f:File) -> (Point, Point, AHashSet<Point>){
+    let mut blocks:AHashSet<Point> = AHashSet::default();
     let mut start:Option<Point> = None;
     let mut h = 0;
     let mut w = 0;
@@ -32,11 +32,10 @@ fn parse_input(f:File) -> (Point, Point, HashSet<Point>){
     (bounds, start, blocks) 
 }
 
-fn part_one(start: &Point, bounds: &Point, blocks: &HashSet<Point>) -> (usize, HashMap<Point, usize>) {
+fn part_one(mut current: Point, bounds: &Point, blocks: &AHashSet<Point>) -> (usize, AHashMap<Point, usize>) {
     let mut d_index = 0;
-    let mut seen:HashSet<Point> = HashSet::new();
-    let mut seen_dir:HashMap<Point, usize> = HashMap::new();
-    let mut current = start.clone();
+    let mut seen:AHashSet<Point> = AHashSet::default();
+    let mut seen_dir:AHashMap<Point, usize> = AHashMap::default();
 
     while current.within(bounds) {
         seen.insert(current);
@@ -55,11 +54,8 @@ fn part_one(start: &Point, bounds: &Point, blocks: &HashSet<Point>) -> (usize, H
     (seen.len(), seen_dir)
 }
 
-fn is_loop(start: &Point, bounds: &Point, d_index: usize, blocks: &HashSet<Point>, potential_block:&Point) -> bool{
-    let mut seen:HashSet<(Point, usize)> = HashSet::new();
-
-    let mut current = start.clone();
-    let mut d_index = d_index.clone();
+fn is_loop(mut current: Point, bounds: &Point, mut d_index: usize, blocks: &AHashSet<Point>, potential_block:&Point) -> bool{
+    let mut seen:AHashSet<(Point, usize)> = AHashSet::default();
     
     while current.within(bounds) {
         if seen.contains(&(current, d_index)) {
@@ -77,12 +73,12 @@ fn is_loop(start: &Point, bounds: &Point, d_index: usize, blocks: &HashSet<Point
     false
 }
 
-fn part_two(path: &HashMap<Point, usize>,  bounds: &Point, blocks: &HashSet<Point>) -> usize {
+fn part_two(path: &AHashMap<Point, usize>,  bounds: &Point, blocks: &AHashSet<Point>) -> usize {
     path.par_iter()
     .map(|(potential_block, d_index)| {
         let dir = DIRECTIONS[*d_index];
         let start = *potential_block - dir;
-        if is_loop(&start, bounds, (d_index + 1) % DIRECTIONS.len(), blocks, potential_block) {
+        if is_loop(start, bounds, (d_index + 1) % DIRECTIONS.len(), blocks, potential_block) {
             1
         } else {
             0
@@ -95,7 +91,7 @@ fn main() {
     let path = Path::new("data.txt");
     let f = File::open(path).expect("Could not open the file!");
     let (bounds, start, blocks) = parse_input(f);
-    let (total, visited) = part_one(&start, &bounds, &blocks);
+    let (total, visited) = part_one(start, &bounds, &blocks);
     println!("Part one: {:?}", total);
 
     let loops = part_two(&visited, &bounds, &blocks);
