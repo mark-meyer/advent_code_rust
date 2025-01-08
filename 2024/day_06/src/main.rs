@@ -66,7 +66,6 @@ fn is_loop(start: &Point, bounds: &Point, d_index: usize, blocks: &HashSet<Point
         if seen.contains(&(current, d_index)) {
             return true
         }
-       
         let dir = DIRECTIONS[d_index];
         let next = current + dir;
         if blocks.contains(&next) || next == *potential_block {
