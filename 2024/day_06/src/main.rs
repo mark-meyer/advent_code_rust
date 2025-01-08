@@ -15,10 +15,10 @@ fn parse_input(f:File) -> (Point, Point, AHashSet<Point>){
         let line = line_result.unwrap();
         for (col, chr) in line.chars().enumerate() {
             if chr == '#' {
-                let p = Point{row: row as i32, col: col as i32};
+                let p = Point::new(row as i32, col as i32);
                 blocks.insert(p);
             } else if chr == '^' {
-                start = Some(Point{row: row as i32, col: col as i32});
+                start = Some(Point::new(row as i32, col as i32));
             }
             w = col;
         }
