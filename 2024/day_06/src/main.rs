@@ -3,7 +3,6 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::collections::{HashSet, HashMap};
 use rayon::prelude::*;
-use std::sync::mpsc::channel;
 
 use day_06::*;
 
@@ -79,17 +78,17 @@ fn is_loop(start: &Point, bounds: &Point, d_index: usize, blocks: &HashSet<Point
 }
 
 fn part_two(path: &HashMap<Point, usize>,  bounds: &Point, blocks: &HashSet<Point>) -> usize {
-
-    let (sender, receiver) = channel();
-
-    path.into_par_iter().for_each_with(sender, |s, (potential_block, d_index)| {
+    path.par_iter()
+    .map(|(potential_block, d_index)| {
         let dir = DIRECTIONS[*d_index];
         let start = *potential_block - dir;
-        if  is_loop(&start, bounds, (d_index + 1) % DIRECTIONS.len(), blocks, &potential_block) {
-            s.send(1).unwrap()
+        if is_loop(&start, bounds, (d_index + 1) % DIRECTIONS.len(), blocks, potential_block) {
+            1
+        } else {
+            0
         }
-    });
-    receiver.iter().sum()
+    })
+    .sum()
 }
 
 fn main() {
