@@ -3,44 +3,10 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::ops::{Add, Mul};
-
 use regex::Regex;
 
-#[derive(Debug)]
-pub struct TestValue {
-    pub target: u64,
-    pub values: Vec<u64>,
-}
+use day_07::*;
 
-impl TestValue {
-    fn new(target: u64, values: Vec<u64>) -> Self {
-        TestValue {target, values}
-    }
-
-    fn is_valid(&self, operators: &Vec<fn(u64, u64) -> u64>) -> bool {
-        let mut stack = vec![(self.values[0], 1)];
-
-        while !stack.is_empty(){
-            if let Some((total, index)) = stack.pop() {
-                if index == self.values.len() {
-                    if total == self.target {
-                        return true
-                    }    
-                } else if total <= self.target {
-                    stack.extend(operators
-                        .iter()
-                        .map(|f| (f(total, self.values[index]), index+1))
-                    );
-                }
-            }
-        }
-        false
-    }
-}
-
-fn concat(a:u64, b:u64) -> u64 {
-    a * 10_u64.pow(b.ilog10() + 1) + b
-}
 
 fn parse_input(f: File) -> Result<Vec<TestValue>, Box<dyn Error>> {
     let re = Regex::new(r"\d+")?;
@@ -63,14 +29,19 @@ fn parse_input(f: File) -> Result<Vec<TestValue>, Box<dyn Error>> {
     .collect()
 }
 
-fn run(tests: &Vec<TestValue>, operators: &Vec<fn(u64, u64) -> u64>) -> u64{
+
+fn concat(a:u64, b:u64) -> u64 {
+    if b == 0 {
+        return a * 10
+    }
+    a * 10_u64.pow(b.ilog10() + 1) + b
+}
+
+fn run<F>(tests: &Vec<TestValue>, operators: &Vec<F>) -> u64
+    where F: Fn(u64, u64) -> u64
+{
     tests.iter()
-    .filter_map(|t| {
-        match t.is_valid(operators) {
-            true => Some(t.target),
-            false => None
-        }
-    })
+    .filter_map(|t| t.valid_total(operators))
     .sum()
 }
 
@@ -88,4 +59,19 @@ fn main() {
     
     operators.push(concat);
     println!("Part two: {:?}", run(&input_values, &operators));
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_concat() {
+        assert_eq!(concat(123, 456), 123456);
+        assert_eq!(concat(123, 0), 1230);
+        assert_eq!(concat(1, 1230), 11230);
+        assert_eq!(concat(0, 0), 0);
+        assert_eq!(concat(0, 123), 123);
+    }
 }
