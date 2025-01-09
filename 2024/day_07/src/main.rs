@@ -2,6 +2,8 @@ use std::path::Path;
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::ops::{Add, Mul};
+
 use regex::Regex;
 
 #[derive(Debug)]
@@ -15,7 +17,7 @@ impl TestValue {
         TestValue {target, values}
     }
 
-    fn is_valid(&self, part_two:bool) -> bool {
+    fn is_valid(&self, operators: &Vec<fn(u64, u64) -> u64>) -> bool {
         let mut stack = vec![(self.values[0], 1)];
 
         while !stack.is_empty(){
@@ -25,11 +27,10 @@ impl TestValue {
                         return true
                     }    
                 } else if total <= self.target {
-                    stack.push((total + self.values[index], index + 1));
-                    stack.push((total * self.values[index], index + 1));
-                    if part_two {
-                        stack.push((concat(total,self.values[index]), index + 1));
-                    }
+                    stack.extend(operators
+                        .iter()
+                        .map(|f| (f(total, self.values[index]), index+1))
+                    );
                 }
             }
         }
@@ -38,6 +39,7 @@ impl TestValue {
 }
 
 fn concat(a:u64, b:u64) -> u64 {
+    //format!("{}{}", a, b).parse::<u64>().unwrap()
     a * 10_u64.pow(b.ilog10() + 1) + b
 }
 
@@ -62,10 +64,10 @@ fn parse_input(f: File) -> Result<Vec<TestValue>, Box<dyn Error>> {
     .collect()
 }
 
-fn run(tests: &Vec<TestValue>, part_two:bool) -> u64{
+fn run(tests: &Vec<TestValue>, operators: &Vec<fn(u64, u64) -> u64>) -> u64{
     tests.iter()
     .filter_map(|t| {
-        match t.is_valid(part_two) {
+        match t.is_valid(operators) {
             true => Some(t.target),
             false => None
         }
@@ -76,8 +78,15 @@ fn run(tests: &Vec<TestValue>, part_two:bool) -> u64{
 fn main() {
     let p = Path::new("data.txt");
     let f = File::open(p).expect("The elephants took the file too!");
-    let input_values = parse_input(f).expect("could not parse file");
+    let input_values = parse_input(f).expect("Could not parse file");
     
-    println!("{:?}", run(&input_values, false));
-    println!("{:?}", run(&input_values, true));
+    let mut operators = vec![
+        Add::add,
+        Mul::mul,
+    ];
+
+    println!("Part one: {:?}", run(&input_values, &operators));
+    
+    operators.push(concat);
+    println!("Part two: {:?}", run(&input_values, &operators));
 }
