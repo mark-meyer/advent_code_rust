@@ -39,7 +39,6 @@ impl TestValue {
 }
 
 fn concat(a:u64, b:u64) -> u64 {
-    //format!("{}{}", a, b).parse::<u64>().unwrap()
     a * 10_u64.pow(b.ilog10() + 1) + b
 }
 
