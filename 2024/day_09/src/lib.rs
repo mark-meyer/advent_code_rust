@@ -72,14 +72,15 @@ where F: Fn(&SegmentData, &SegmentData) -> Ordering {
         self.tree[self.size..self.size + self.n].iter()
     }
 
-    pub fn update(&mut self, idx: usize, value: SegmentData) {
+    pub fn update(&mut self, idx: usize, value: u64, data:Vec<u32>) {
         if idx >= self.size {
             return
         }
 
         let mut pos = self.size + idx;
-        self.tree[pos] = value;
-
+        let seg_data = self.tree.get_mut(pos).unwrap();
+        seg_data.value = value;
+        seg_data.data = data;
 
         while pos >= 1 {
             pos /= 2;

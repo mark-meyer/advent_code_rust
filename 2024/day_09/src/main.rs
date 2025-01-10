@@ -90,11 +90,12 @@ fn compact_files(files: &Vec<(u64, u64)>, free_block: &Vec<u64>) -> u64 {
 
                 let new_data = vec![*file_id as u32; *file_size as usize];
 
-                let updated = SegmentData{
-                    value: seg_data.value - *file_size,
-                    data: [seg_data.data.clone(), new_data].concat()
-                };
-                disk_blocks.update(found_idx, updated);
+                disk_blocks.update(
+                    found_idx, 
+                    seg_data.value - *file_size,
+                    [seg_data.data.clone(), new_data].concat()
+                );
+                
                 // keep track of moved indices so
                 // we don't count them twice.
                 move_indices.insert(move_index);
