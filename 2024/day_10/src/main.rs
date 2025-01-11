@@ -23,8 +23,7 @@ fn parse(f:File) -> Result<Matrix, Box<dyn Error>> {
                 .ok_or_else(|| "Bad trail data".into())
                 .and_then(|num| num.try_into().map_err(|_| "Failed to convert number".into()))
             )
-    
-        .collect::<Result<Vec<usize>, _>>()
+            .collect::<Result<Vec<usize>, _>>()
     })
     .collect::<Result<Matrix, _>>()
 }
