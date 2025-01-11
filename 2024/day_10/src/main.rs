@@ -59,7 +59,7 @@ fn count_paths(start:&Point, map:&Matrix, part:Part) -> u32{
 
     while !stack.is_empty() {
         let current = stack.pop().unwrap();
-        let height = map[current.row as usize][current.col as usize];
+        let height = map[current.row][current.col];
         if height == 9 {
             score += 1;
             continue
@@ -67,7 +67,7 @@ fn count_paths(start:&Point, map:&Matrix, part:Part) -> u32{
 
         for dir in &directions {
             if let Some(next_p) = current.step(dir) {
-                let next_height = map[next_p.row as usize][next_p.col as usize];
+                let next_height = map[next_p.row][next_p.col];
                 if next_height == height + 1 {
                     match part {
                         Part::One if seen.contains(&next_p) => {},
