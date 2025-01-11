@@ -40,7 +40,7 @@ fn find(n:u32, map:&Matrix) -> Vec<Point> {
 }
 
 fn count_paths(start:&Point, map:&Matrix, part:Part) -> u32{
-    let bounds =  Point::new((map.len() -1) as i32, (map[0].len() -1) as i32);
+    let bounds =  Point::new((map.len() - 1) as i32, (map[0].len() - 1) as i32);
 
     let mut stack = vec![*start];
     let mut seen = HashSet::new();
@@ -59,7 +59,7 @@ fn count_paths(start:&Point, map:&Matrix, part:Part) -> u32{
             if !next_p.within(&bounds) {
                 continue
             }
-            
+
             let next_height = map[next_p.row as usize][next_p.col as usize];
             if next_height == height + 1 {
                 match part {
