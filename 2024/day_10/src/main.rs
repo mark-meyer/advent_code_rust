@@ -66,7 +66,7 @@ fn count_paths(start:&Point, map:&Matrix, part:Part) -> u32{
         }
 
         for dir in &directions {
-            if let Some(next_p) = dir.step(current) {
+            if let Some(next_p) = current.step(dir) {
                 let next_height = map[next_p.row as usize][next_p.col as usize];
                 if next_height == height + 1 {
                     match part {
