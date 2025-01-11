@@ -1,34 +1,29 @@
-use std::ops::Add;
-
-
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub struct Point {
-    pub row: i32,
-    pub col: i32
+    pub row: usize,
+    pub col: usize
 }
 
-impl Point {
-    pub const fn new(row: i32, col: i32) -> Self {
-        Point {row, col}
-    }
-    pub fn within(&self, bounds:&Point) -> bool {
-        self.row >= 0 && self.row <= bounds.row
-        && self.col >= 0 && self.col <= bounds.col
-    }
+
+pub enum Direction {
+    North,
+    South(usize),
+    East(usize),
+    West
 }
-impl Add for Point {
-    type Output = Point;
-    fn add(self, rhs: Self) -> Self::Output {
-        Point {
-            row: self.row + rhs.row,
-            col: self.col + rhs.col
+
+impl Direction {
+    pub fn step(&self, Point{row, col}: Point) -> Option<Point> {
+        match self {
+            Direction::North if row > 0  => 
+                Some(Point{row: row - 1, col}),
+            Direction::West if col > 0  => 
+                Some(Point{row, col:col - 1}),
+            Direction::East(bound) if col < *bound  => 
+                Some(Point{row, col:col + 1}),
+            Direction::South(bound) if row < *bound => 
+                Some(Point{row: row + 1,col}),
+            _ => None
         }
     }
 }
-
-pub const DIRECTIONS: [Point; 4] = [
-    Point::new(-1, 0),  // Up
-    Point::new(0, 1),   // Right
-    Point::new(1, 0),   // Down
-    Point::new(0, -1),  // Left
-];

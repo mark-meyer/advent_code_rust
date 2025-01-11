@@ -5,7 +5,7 @@ use std::error::Error;
 use std::collections::HashSet;
 use day_10::*;
 
-type Matrix = Vec<Vec<u32>>;
+type Matrix = Vec<Vec<usize>>;
 
 enum Part{
     One,
@@ -18,19 +18,22 @@ fn parse(f:File) -> Result<Matrix, Box<dyn Error>> {
     .map(|line| {
         let line = line?;
         line.chars()
-            .map(|c| c.to_digit(10).ok_or_else(|| "Bad trail data".into()))
-        .collect::<Result<Vec<u32>, _>>()
+            .map(|c| c
+                .to_digit(10)
+                .map(|n| n as usize)
+                .ok_or_else(|| "Bad trail data".into()))
+        .collect::<Result<Vec<usize>, _>>()
     })
     .collect::<Result<Matrix, _>>()
 }
 
-fn find(n:u32, map:&Matrix) -> Vec<Point> {
+fn find(n:usize, map:&Matrix) -> Vec<Point> {
     map.iter()
     .enumerate()
     .flat_map(|(r, row)| row.iter()
         .enumerate()
         .filter_map(|(c, &m)| if m == n {
-            Some(Point::new(r as i32, c as i32))
+            Some(Point{row: r, col:c})
         } else {
             None
         })
@@ -40,7 +43,15 @@ fn find(n:u32, map:&Matrix) -> Vec<Point> {
 }
 
 fn count_paths(start:&Point, map:&Matrix, part:Part) -> u32{
-    let bounds =  Point::new((map.len() - 1) as i32, (map[0].len() - 1) as i32);
+    let h = map.len() - 1;
+    let w = map[0].len() - 1;
+
+    let directions = [
+        Direction::North,
+        Direction::South(h),
+        Direction::East(w),
+        Direction::West
+    ];
 
     let mut stack = vec![*start];
     let mut seen = HashSet::new();
@@ -54,19 +65,16 @@ fn count_paths(start:&Point, map:&Matrix, part:Part) -> u32{
             continue
         }
 
-        for dir in DIRECTIONS {
-            let next_p = current + dir;
-            if !next_p.within(&bounds) {
-                continue
-            }
-
-            let next_height = map[next_p.row as usize][next_p.col as usize];
-            if next_height == height + 1 {
-                match part {
-                    Part::One if seen.contains(&next_p) => {},
-                    _ => {
-                        seen.insert(next_p);
-                        stack.push(next_p)
+        for dir in &directions {
+            if let Some(next_p) = dir.step(current) {
+                let next_height = map[next_p.row as usize][next_p.col as usize];
+                if next_height == height + 1 {
+                    match part {
+                        Part::One if seen.contains(&next_p) => {},
+                        _ => {
+                            seen.insert(next_p);
+                            stack.push(next_p)
+                        }
                     }
                 }
             }
