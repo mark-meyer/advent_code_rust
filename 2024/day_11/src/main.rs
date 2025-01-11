@@ -11,28 +11,32 @@ fn parse(s: &str) -> Result<Vec<u64>, Box<dyn Error>> {
     .collect()
 } 
 
-fn blink(counts: &HashMap<u64, u64>, blinks:u32) -> HashMap<u64, u64> {
+fn blink(counts: &HashMap<u64, u64>, blinks: u32) -> HashMap<u64, u64> {
     let mut current = counts.clone();
-    for _ in 0..blinks {
-        let mut update_counts = HashMap::new();
-        for (stone, count) in current {
-            match stone {
-                n if n == 0 => 
-                    *update_counts.entry(1).or_default() += count,
+    let mut update_counts = HashMap::new();
 
-                n if (n.ilog10() + 1) % 2 == 0  =>  {
-                    let (l, r) = split_n(n);
+    for _ in 0..blinks {
+        update_counts.clear();
+        for (stone, count) in &current {
+            match stone {
+                n if *n == 0 => {
+                    *update_counts.entry(1).or_default() += count;
+                }
+                n if (n.ilog10() + 1) % 2 == 0 => {
+                    let (l, r) = split_n(*n);
                     *update_counts.entry(l).or_default() += count;
                     *update_counts.entry(r).or_default() += count;
-                },
-                n =>
-                    *update_counts.entry(n*2024).or_default() += count
+                }
+                n => {
+                    *update_counts.entry(n * 2024).or_default() += count;
+                }
             }
         }
-        current = update_counts;
+        std::mem::swap(&mut current, &mut update_counts); 
     }
     current
 }
+
 
 fn split_n(n: u64) -> (u64, u64) {
     let d = (n.ilog10() + 1) / 2;
