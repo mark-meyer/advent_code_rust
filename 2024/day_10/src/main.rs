@@ -31,13 +31,10 @@ fn parse(f:File) -> Result<Matrix, Box<dyn Error>> {
 fn find(n:usize, map:&Matrix) -> Vec<Point> {
     map.iter()
     .enumerate()
-    .flat_map(|(r, row)| row.iter()
+    .flat_map(|(row, r)| r.iter()
         .enumerate()
-        .filter_map(|(c, &m)| if m == n {
-            Some(Point{row: r, col:c})
-        } else {
-            None
-        })
+        .filter(|(_, &m)| m == n)
+        .map(|(col, _)| Point{row, col})
         .collect::<Vec<Point>>()
     )
     .collect()

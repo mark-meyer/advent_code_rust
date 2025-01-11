@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
 use std::error::Error; 
 
 
@@ -47,8 +46,7 @@ fn split_n(n: u64) -> (u64, u64) {
 }
 
 fn main() {
-    let p = Path::new("data.txt");
-    let s = fs::read_to_string(p).expect("the stones blinked out of existence");
+    let s = fs::read_to_string("data.txt").expect("the stones blinked out of existence");
     let stones = parse(&s).unwrap();
 
     let mut counts:HashMap<u64, u64> = HashMap::new();
