@@ -2,7 +2,7 @@ use std::fs::File;
 use std::collections::HashSet;
 use day_12::*;
 
-fn flood_fill(p:&Point, crop:&char, field:&Field) -> (HashSet<Point>,usize) {
+fn flood_fill(p:&Point, crop:&char, field:&Field, seen: &mut Vec<Vec<bool>>) -> (HashSet<Point>,usize) {
     /* Get contigous element…get the perimeter while we're here. */
     let directions = [
         Direction::South(field.h),
@@ -12,30 +12,27 @@ fn flood_fill(p:&Point, crop:&char, field:&Field) -> (HashSet<Point>,usize) {
     ];
 
     let mut group = HashSet::new();
-    group.insert(*p);
     let mut stack = vec![*p];
-
     let mut total_perimeter = 0;
 
-    while !stack.is_empty() {
-        let current = stack.pop().unwrap();
-        let mut local_perimeter = 4;
+    while let Some(current) = stack.pop() {
+        if group.contains(&current) ||  seen[current.row][current.col] {
+            continue
+        }
+        seen[current.row][current.col] = true;
+        group.insert(current);
 
         for d in &directions {
             if let Some(neighbor) = current.step(&d) {
-                if group.contains(&neighbor) {
-                    local_perimeter -= 1;
-                    continue
-                }
                 if field.get(&neighbor) == *crop {
                     stack.push(neighbor);
-                    group.insert(neighbor);
-                    local_perimeter -= 1;
+                } else {
+                    total_perimeter += 1;
                 } 
+            } else {
+                total_perimeter += 1;
             }
         }
-        
-        total_perimeter += local_perimeter;
     }
     (group, total_perimeter)
 }
@@ -48,7 +45,6 @@ fn count_corners(point:&Point, field:&Field, group:&HashSet<Point>) -> usize {
         [Direction::West, Direction::NorthWest, Direction::North],
     ]
     .map(|ds| ds.map(|d| point.step(&d).and_then(|p| group.get(&p))));
-    
     
     corners.iter().map(|corner| {
         match corner {
@@ -70,15 +66,14 @@ fn part_two(groups:&Vec<HashSet<Point>>, field:&Field) -> usize{
 
 fn get_crop_groups(field:&Field) -> (Vec<HashSet<Point>>, usize) {
     let mut groups = Vec::new();
-    let mut seen:HashSet<Point> = HashSet::new();
+    let mut seen = vec![vec![false; field.h]; field.w]; 
     let mut total = 0;
     for (p, crop) in field {
-        if seen.contains(&p) { continue }
+        if seen[p.row][p.col] { continue }
         
-        let (group, perimeter_len) = flood_fill(&p, &crop, &field);
+        let (group, perimeter_len) = flood_fill(&p, &crop, &field, &mut seen);
         
         total += group.len() * perimeter_len;
-        seen.extend(&group);
         groups.push(group);
     }
     (groups, total)
