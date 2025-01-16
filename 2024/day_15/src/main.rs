@@ -44,17 +44,17 @@ fn parse(data:&str) -> (Warehouse, Vec<Direction>) {
 fn main() {
     let data = fs::read_to_string("data.txt").expect("What? No map!");
     let (mut warehouse, path) = parse(&data);
-    let big_warehouse = &warehouse.expand();
+    let mut big_warehouse = warehouse.expand();
 
-    println!("{:?}", &warehouse.bot);
 
     for dir in &path {
         warehouse.push(dir);
     }
-    // println!("{}", warehouse);
-    println!("score: {}", &warehouse.score());
 
-    println!("{}", &big_warehouse);
-    println!("bot: {:?}", &big_warehouse.bot);
+    println!("Part One: {}", &warehouse.score());
 
+    for dir in &path {
+        big_warehouse.push(dir);
+    }
+    println!("Part Two: {}", &big_warehouse.score_expanded());
 }
