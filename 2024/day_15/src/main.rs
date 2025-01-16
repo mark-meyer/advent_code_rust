@@ -38,7 +38,6 @@ fn parse(data:&str) -> (Warehouse, Vec<Direction>) {
         Warehouse {map, bot:bot_pos.unwrap()},
         path
     )
- 
 }
 
 fn main() {

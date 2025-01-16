@@ -63,8 +63,7 @@ impl Warehouse {
                 return Some(moves)
             }
 
-            let frontier = next
-            .iter()
+            let frontier = next.iter()
             .flat_map(|point| {
                 let next_point = point.step(dir);
 
@@ -85,6 +84,7 @@ impl Warehouse {
                     _ => vec![next_point]
                 } 
             }).collect();
+
             moves.push(next);
             next = frontier;
         }
@@ -93,14 +93,10 @@ impl Warehouse {
     pub fn push(&mut self, dir:&Direction){
         let point = self.bot;
         if let Some(moves) = self.get_moves(point, dir) {
-            for frontier in moves.iter().rev() {
-                
+            for frontier in moves.iter().rev() {       
                 for point in frontier {
-                    let src_obj = self.get(&point).clone();
                     let dest = point.step(dir);
-                    let dest_obj = self.get(&dest).clone();
-                    self.map[point.row][point.col] = dest_obj;
-                    self.map[dest.row][dest.col] = src_obj;
+                    (self.map[point.row][point.col], self.map[dest.row][dest.col]) = (*self.get(&dest), *self.get(point));
                 }
             }
         self.map[self.bot.row][self.bot.col] = Object::Space;
