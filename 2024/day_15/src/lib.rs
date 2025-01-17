@@ -51,9 +51,9 @@ impl Warehouse {
         &self.map[point.row][point.col]
     }
 
-    pub fn get_moves(&self, point:Point, dir:&Direction) -> Option<Vec<HashSet<Point>>> {
+    pub fn get_moves(&self, point:Point, dir:&Direction) -> Option<Vec<Point>> {
         let mut next = HashSet::from([point]); 
-        let mut moves = vec![];
+        let mut moves:Vec<Point> = vec![];
         
         loop {
             if next.iter().any(|point| matches!(self.get(&point), Object::Wall)) {
@@ -85,21 +85,22 @@ impl Warehouse {
                 } 
             }).collect();
 
-            moves.push(next);
+            moves.extend(next);
             next = frontier;
         }
     }
 
     pub fn push(&mut self, dir:&Direction){
         let point = self.bot;
-        if let Some(moves) = self.get_moves(point, dir) {
-            for frontier in moves.iter().rev() {       
-                for point in frontier {
-                    let dest = point.step(dir);
-                    (self.map[point.row][point.col], self.map[dest.row][dest.col]) = (*self.get(&dest), *self.get(point));
-                }
+        if let Some(mut moves) = self.get_moves(point, dir) {
+            while let Some(point) = moves.pop(){
+                let dest = point.step(dir);
+                let dest_obj = *self.get(&dest);
+                let source_obj = *self.get(&point);
+                // swap objects for each move
+                self.map[point.row][point.col] = dest_obj;
+                self.map[dest.row][dest.col] = source_obj;
             }
-        self.map[self.bot.row][self.bot.col] = Object::Space;
         self.bot = self.bot.step(&dir);
         }
     }
