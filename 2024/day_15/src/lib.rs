@@ -55,10 +55,8 @@ impl Warehouse {
         let mut next = HashSet::from([point]); 
         let mut moves:Vec<Point> = vec![];
         let mut frontier = HashSet::new();
-        loop {
-            if next.iter().all(|point| matches!(self.get(&point), Object::Space)) {
-                return Some(moves)
-            }
+        while !next.is_empty() {
+
             for point in &next {
                 let next_point = point.step(dir);
 
@@ -78,8 +76,8 @@ impl Warehouse {
             moves.extend(&next);
             std::mem::swap(&mut next, &mut frontier);
             frontier.clear();
-
         }
+        Some(moves)
     }
 
     pub fn push(&mut self, dir:&Direction){
@@ -87,10 +85,10 @@ impl Warehouse {
         if let Some(mut moves) = self.get_moves(point, dir) {
             while let Some(point) = moves.pop(){
                 let dest = point.step(dir);
-                let dest_obj = *self.get(&dest);
                 let source_obj = *self.get(&point);
-                // swap objects for each move
-                self.map[point.row][point.col] = dest_obj;
+                // Moving objects from leaf to source leave a space 
+                // in their wake
+                self.map[point.row][point.col] = Object::Space;
                 self.map[dest.row][dest.col] = source_obj;
             }
             self.bot = self.bot.step(&dir);
