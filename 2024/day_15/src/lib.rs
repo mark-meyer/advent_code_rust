@@ -54,39 +54,31 @@ impl Warehouse {
     pub fn get_moves(&self, point:Point, dir:&Direction) -> Option<Vec<Point>> {
         let mut next = HashSet::from([point]); 
         let mut moves:Vec<Point> = vec![];
-        
+        let mut frontier = HashSet::new();
         loop {
-            if next.iter().any(|point| matches!(self.get(&point), Object::Wall)) {
-                return None
-            }
             if next.iter().all(|point| matches!(self.get(&point), Object::Space)) {
                 return Some(moves)
             }
-
-            let frontier = next.iter()
-            .flat_map(|point| {
+            for point in &next {
                 let next_point = point.step(dir);
 
-                match self.get(&next_point) {
-                    Object::CrateLeft => {
-                        match dir {
-                            Direction::East | Direction::West => vec![next_point],
-                            _ => vec![next_point, Point{row: next_point.row, col:next_point.col + 1}]
-                        }
+                match (self.get(&next_point), dir) {
+                    (Object::CrateLeft, Direction::North|Direction::South) => {
+                        frontier.extend([next_point, Point{row: next_point.row, col:next_point.col + 1}]);
                     },
-                    Object::CrateRight => {
-                        match dir {
-                            Direction::East | Direction::West => vec![next_point],
-                            _ => vec![next_point, Point{row: next_point.row, col:next_point.col - 1}]
-                        }
+                    (Object::CrateRight, Direction::North|Direction::South) => {
+                        frontier.extend([next_point, Point{row: next_point.row, col:next_point.col - 1}]);
                     },
-                    Object::Space => vec![],
-                    _ => vec![next_point]
+                    (Object::Space, _) => {},
+                    (Object::Wall, _) => return None,
+                    _ => {frontier.insert(next_point);}
                 } 
-            }).collect();
+            }
 
-            moves.extend(next);
-            next = frontier;
+            moves.extend(&next);
+            std::mem::swap(&mut next, &mut frontier);
+            frontier.clear();
+
         }
     }
 
