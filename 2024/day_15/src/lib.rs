@@ -93,7 +93,7 @@ impl Warehouse {
                 self.map[point.row][point.col] = dest_obj;
                 self.map[dest.row][dest.col] = source_obj;
             }
-        self.bot = self.bot.step(&dir);
+            self.bot = self.bot.step(&dir);
         }
     }
 
@@ -105,21 +105,7 @@ impl Warehouse {
             .iter()
             .enumerate()
             .map(move |(col, obj)| match obj {
-                Object::Box => row  * 100 + col,
-                _ => 0 
-            })
-        ).sum()
-    }
-
-    pub fn score_expanded(&self) -> usize{
-        self.map
-        .iter()
-        .enumerate()
-        .flat_map(|(row, line)| line
-            .iter()
-            .enumerate()
-            .map(move |(col, obj)| match obj {
-                Object::CrateLeft => row  * 100 + col,
+                Object::Box | Object::CrateLeft=> row  * 100 + col,
                 _ => 0 
             })
         ).sum()
@@ -132,13 +118,13 @@ impl Warehouse {
         .map(|(row, line)| line.iter().enumerate()
             .flat_map(|(col, c)| {
                 match c {
-                    Object::Wall => [Object::Wall, Object::Wall],
+                    Object::Wall => [Object::Wall; 2],
                     Object::Box => [Object::CrateLeft, Object::CrateRight],
                     Object::Bot => {
                         bot_pos = Some(Point{row:row, col:col*2});
                         [Object::Bot, Object::Space]
                     }
-                    _ => [Object::Space, Object::Space]
+                    _ => [Object::Space;2]
                 }
             }).collect()
         ).collect();

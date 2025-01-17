@@ -55,5 +55,5 @@ fn main() {
     for dir in &path {
         big_warehouse.push(dir);
     }
-    println!("Part Two: {}", &big_warehouse.score_expanded());
+    println!("Part Two: {}", &big_warehouse.score());
 }
