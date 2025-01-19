@@ -9,7 +9,4 @@ fn main() {
         println!("Part one: {}", cost);
         println!("Part Two: {}", len);
     }
-
-
-
 }

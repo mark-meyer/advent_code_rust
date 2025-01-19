@@ -89,7 +89,6 @@ impl Maze {
                         
                         MazeSpot::Space  => {
                             let previous_cost = costs[neighbor_point.row][neighbor_point.col][direction as usize];
-                            //let prev_cost = previous_costs[direction as usize];
                             let mut next_cost = cost;
                             let next_point;
                             let mut new_path = path.clone();
@@ -109,13 +108,8 @@ impl Maze {
                                     point:Point{ dir:direction, ..next_point},
                                     path: new_path
                                 });
-                                //let mut next_costs = previous_costs.clone();
-                                //next_costs[direction as usize] = next_cost;
                                 let (row, col) = next_point.coords();
                                 costs[row][col][direction as usize] = next_cost
-
-                                //self.matrix[row][col] = MazeSpot::Space(next_costs);
-                                
                             }
                         }
                     }
