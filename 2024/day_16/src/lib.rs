@@ -118,11 +118,6 @@ impl Maze {
         }
         None
     }
-    pub fn back_track(&self) {
-        let (row, col) = self.end;
-        let spot = self.matrix[row+1][col];
-        println!{"{:?}, {}-{}", spot, row, col};
-    }
 }
 impl From<String> for Maze {
     fn from(s:String) -> Self {
