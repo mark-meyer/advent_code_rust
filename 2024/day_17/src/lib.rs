@@ -14,14 +14,13 @@ impl Machine {
             output: vec![]
         }
     }
-    pub fn run(&mut self, program:Vec<u32>) -> Vec<u32> {
+    pub fn run(&mut self, program:&Vec<u32>) -> Vec<u32> {
         loop {
             if self.inst_pointer >= program.len() {
                 break;
             }
             let inst = program[self.inst_pointer] as usize;
             let arg =  program[self.inst_pointer + 1];
-            
             match inst {
                 0 => self.adv(arg),
                 1 => self.bxl(arg),
@@ -82,5 +81,4 @@ impl Machine {
         self.c = self.a / (2_u64.pow(self.combo(n)));
         self.inst_pointer += 2;
     }
-
 }
