@@ -54,7 +54,8 @@ fn main() {
     let output = machine.run(&program);
     println!("Part one: {:?}", output);
 
-    let part_two = search(&program);
-    println!("Part two: {:?}", part_two.iter().min());
+    if let Some(part_two) = search(&program) {
+        println!("Part two: {:?}", part_two);
+    }
 
 }
