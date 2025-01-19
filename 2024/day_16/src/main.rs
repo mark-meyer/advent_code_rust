@@ -41,8 +41,8 @@ fn count_paths(end: (usize, usize), costs:&Vec<Vec<[u64;4]>>) -> usize  {
     return points.len()
 }
 fn main() {
-    let raw_map = fs::read_to_string("data.txt").expect("The elves lost the course map!");
-    let maze:Maze = raw_map.into();
+    let f = fs::File::open("data.txt").expect("The elves lost the course map!");
+    let maze:Maze = Maze::from(f);
     if let Some((cost, costs)) = maze.least_cost() {
         println!("Part one: {}", cost);
     

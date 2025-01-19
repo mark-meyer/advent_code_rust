@@ -1,5 +1,7 @@
 use std::collections::BinaryHeap;
 use std::cmp::Ordering;
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum Direction {
@@ -62,7 +64,7 @@ impl Maze {
 
     pub fn least_cost(&self) -> Option<(u64, Vec<Vec<[u64;4]>>)> {        
         let start_node = HeapNode{cost:0, point:self.start};
-        let mut heap:BinaryHeap<HeapNode> = BinaryHeap::from([start_node]);
+        let mut heap = BinaryHeap::from([start_node]);
 
         let mut costs = vec![vec![[u64::MAX; 4]; self.matrix[0].len()]; self.matrix.len()];
 
@@ -71,18 +73,18 @@ impl Maze {
             if let Some(HeapNode{cost, point}) = heap.pop() {
                 let (row, col) = point.coords();
                 let current_direction = point.dir; 
+                let current_cost = &mut costs[row][col][current_direction as usize];
                 
-                if cost <=  costs[row][col][current_direction as usize] {
-                    costs[row][col][current_direction as usize] = cost;
-                } 
+                if cost > *current_cost { continue }
+                *current_cost = cost;
+                 
 
                 if (row, col) == self.end { return Some((cost, costs)) }
                 
                 for direction in DIRECTIONS {
-                    let neighbor_point = point.step(direction);
+                    let neighbor = point.step(direction);
 
-                    if let  MazeSpot::Space = self.get(&neighbor_point) {   
-                        let previous_cost = costs[neighbor_point.row][neighbor_point.col][direction as usize];
+                    if let  MazeSpot::Space = self.get(&neighbor) {   
                         let next_cost;
                         let next_point;
 
@@ -91,9 +93,9 @@ impl Maze {
                             next_point = point;
                         } else {
                             next_cost = cost +  1;
-                            next_point = neighbor_point;
+                            next_point = neighbor;
                         }
-                        if next_cost <= previous_cost {
+                        if next_cost <= costs[neighbor.row][neighbor.col][direction as usize] {
                             heap.push(HeapNode{
                                 cost:next_cost, 
                                 point:Point{dir:direction, ..next_point},
@@ -106,13 +108,13 @@ impl Maze {
         None
     }
 }
-impl From<String> for Maze {
-    fn from(s:String) -> Self {
+impl From<File> for Maze {
+    fn from(f:File) -> Self {
         let mut start = None;
         let mut end = None;
-        let matrix = s.split("\n")
+        let matrix = BufReader::new(f).lines()
         .enumerate()
-        .map(|(row, line)| line
+        .map(|(row, line)| line.unwrap()
             .chars()
             .enumerate()
             .map(|(col, c)| {
@@ -134,6 +136,7 @@ impl From<String> for Maze {
                 }
             }).collect()
         ).collect();
+        
         Maze{matrix, start: start.expect("No start?!"), end: end.expect("No End?")}
     }  
 }
