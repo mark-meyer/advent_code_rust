@@ -5,7 +5,7 @@ use day_17::*;
 fn parse(s:&str) -> (Machine, Vec<u32>) {
     let rx = Regex::new(r"\d+").unwrap();
     let nums:Vec<u64> = rx
-    .find_iter(&s)
+    .find_iter(s)
     .map(|d| d.as_str()
         .parse::<u64>()
         .unwrap())
@@ -16,7 +16,7 @@ fn parse(s:&str) -> (Machine, Vec<u32>) {
     (machine, program)
 }
 
-fn _out_n_base_8(o:&Vec<u32>) -> u64 {
+fn _out_n_base_8(o:&[u32]) -> u64 {
     o.iter().fold(0_u64, |a, n| a * 8 + *n as u64 )
 }
 
@@ -28,7 +28,7 @@ fn _out_n_base_8(o:&Vec<u32>) -> u64 {
     for each three bits of register A that output the correct 
     corresponding output. 
 */
-fn search(program: &Vec<u32>) -> Option<u64> {
+fn search(program: &[u32]) -> Option<u64> {
     let mut current = vec![0];
     let mut next = Vec::new();
 
@@ -37,7 +37,7 @@ fn search(program: &Vec<u32>) -> Option<u64> {
         for &partial in &current {
             for d in 0..8 {
                 let candidate = (partial << 3) + d ;
-                if Machine::new(candidate, 0, 0).run(program) == &program[i..] {
+                if Machine::new(candidate, 0, 0).run(program) == program[i..] {
                     next.push(candidate);
                 }
             }

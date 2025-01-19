@@ -14,7 +14,7 @@ impl Machine {
             output: vec![]
         }
     }
-    pub fn run(&mut self, program:&Vec<u32>) -> Vec<u32> {
+    pub fn run(&mut self, program:&[u32]) -> Vec<u32> {
         loop {
             if self.inst_pointer >= program.len() {
                 break;
@@ -38,17 +38,17 @@ impl Machine {
 
     fn combo(&self, n:u32) -> u32 {
         if n <= 3 {
-            n as u32
+            n
         } else {
             [self.a, self.b, self.c][(n - 4) as usize] as u32
         }
     }
     fn adv(&mut self, n:u32) {
-        self.a = self.a / (2_u64.pow(self.combo(n)));
+        self.a /= 2_u64.pow(self.combo(n));
         self.inst_pointer += 2;
     }
     fn bxl(&mut self, n:u32) {
-        self.b = self.b ^ n as u64;
+        self.b ^= n as u64;
         self.inst_pointer += 2;
     }
     fn bst(&mut self, n:u32){
@@ -63,7 +63,7 @@ impl Machine {
         }
     }
     fn bxc(&mut self, _n:u32) {
-        self.b = self.b ^ self.c;
+        self.b ^= self.c;
         self.inst_pointer += 2;
     }
 
