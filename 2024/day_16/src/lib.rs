@@ -66,61 +66,43 @@ impl Maze {
 
         let mut costs = vec![vec![[u64::MAX; 4]; self.matrix[0].len()]; self.matrix.len()];
 
-        let mut global_min = u64::MAX;
 
         while !heap.is_empty() {
             if let Some(HeapNode{cost, point}) = heap.pop() {
                 let (row, col) = point.coords();
                 let current_direction = point.dir; 
-
+                
                 if cost <=  costs[row][col][current_direction as usize] {
                     costs[row][col][current_direction as usize] = cost;
-                }
+                } 
 
-                // Don't return immediately on end Wait until other paths
-                //  of the same cost arrive
-                if (row, col) == self.end {
-                    if cost <= global_min {
-                        global_min = cost;
-                    } else {
-                        return Some((global_min, costs))
-                    }
-                    continue
-                }
+                if (row, col) == self.end { return Some((cost, costs)) }
                 
                 for direction in DIRECTIONS {
                     let neighbor_point = point.step(direction);
 
-                    match self.get(&neighbor_point) {
-                        MazeSpot::Wall => {},
-                        
-                        MazeSpot::Space  => {
-                            let previous_cost = costs[neighbor_point.row][neighbor_point.col][direction as usize];
-                            let next_cost;
-                            let next_point;
+                    if let  MazeSpot::Space = self.get(&neighbor_point) {   
+                        let previous_cost = costs[neighbor_point.row][neighbor_point.col][direction as usize];
+                        let next_cost;
+                        let next_point;
 
-                            if direction != current_direction {
-                                next_cost = cost + 1000;
-                                next_point = point;
-                            } else {
-                                next_cost = cost +  1;
-                                next_point = neighbor_point;
-                            }
-                            if next_cost <= previous_cost {
-                                heap.push(HeapNode{
-                                    cost:next_cost, 
-                                    point:Point{dir:direction, ..next_point},
-                                });
-                            }
+                        if direction != current_direction {
+                            next_cost = cost + 1000;
+                            next_point = point;
+                        } else {
+                            next_cost = cost +  1;
+                            next_point = neighbor_point;
+                        }
+                        if next_cost <= previous_cost {
+                            heap.push(HeapNode{
+                                cost:next_cost, 
+                                point:Point{dir:direction, ..next_point},
+                            });
                         }
                     }
                 }
             }
         }
-
-        if global_min < u64::MAX {
-            return Some((global_min, costs))
-        } 
         None
     }
 }

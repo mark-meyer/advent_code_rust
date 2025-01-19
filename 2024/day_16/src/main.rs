@@ -14,13 +14,10 @@ fn count_paths(end: (usize, usize), costs:&Vec<Vec<[u64;4]>>) -> usize  {
         .map(|&d| (*final_cost, Point{row:end.0, col:end.1, dir:d}))
         .collect();
 
-    while !stack.is_empty() {
-        let (target_cost, point) = stack.pop().unwrap();
+    while let Some((target_cost, point)) = stack.pop() {
         points.insert((point.row, point.col));
 
-        if target_cost == 0 { // back at start
-            continue
-        }
+        if target_cost == 0 { continue }
 
         for direction in DIRECTIONS {
             let next = point.step(direction);
