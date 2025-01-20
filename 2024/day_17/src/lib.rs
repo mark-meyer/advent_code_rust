@@ -81,4 +81,32 @@ impl Machine {
         self.c = self.a / (2_u64.pow(self.combo(n)));
         self.inst_pointer += 2;
     }
+
+    /*
+    The program is loop of 8 instructions. Each loop reduces 
+    register 8 by half and outputs a digit. This means for 
+    each three bit value in the output register A is three bits
+    larger. We can solve by working backward and finding canditates
+    for each three bits of register A that output the correct 
+    corresponding output. 
+    */
+    pub fn search(program: &[u32]) -> Option<u64> {
+        let mut current = vec![0];
+        let mut next = Vec::new();
+
+        for i in (0..program.len()).rev() {
+            next.clear();    
+            for &partial in &current {
+                for d in 0..8 {
+                    let candidate = (partial << 3) + d ;
+                    if Machine::new(candidate, 0, 0).run(program) == program[i..] {
+                        next.push(candidate);
+                    }
+                }
+            }
+            std::mem::swap(&mut current, &mut next);
+        }
+        current.into_iter().min()
+    }
+
 }
