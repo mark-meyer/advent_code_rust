@@ -1,4 +1,8 @@
 #[derive(Debug)]
+/// Trie with an alphabet of five letters
+/// represnting each color stripe. The
+/// goal was to make this more efficient
+/// than using a HashMap.
 pub struct Trie {
     children: [Option<Box<Trie>>; 5],
     is_word: bool,
@@ -12,8 +16,8 @@ impl Trie {
         }
     }
 
+    // Get the internal index of the stripe
     fn index_stripe(stripe: char) -> usize {
-        // allows us to use a super sparse children array
         match stripe {
             'b' => 0,
             'g' => 1,
@@ -24,6 +28,7 @@ impl Trie {
         }
     }
 
+    /// Add a prefix to the Trie
     pub fn insert(&mut self, towel: &str) {
         let mut current = self;
 
@@ -34,6 +39,8 @@ impl Trie {
         current.is_word = true;
     }
 
+    /// Get all the known prefixes that match
+    /// the start of the towel pattern
     pub fn get_prefixes<'a>(&self, towel: &'a str) -> Vec<&'a str> {
         let mut current = self;
         let mut prefixes: Vec<&str> = vec![];
@@ -53,6 +60,8 @@ impl Trie {
         prefixes
     }
 
+    /// Returns true if you can make the pattern
+    /// on towel with the words in the Trie
     pub fn is_possible(&self, towel: &str) -> bool {
         let n = towel.len();
         let mut memo = vec![false; n + 1];
@@ -71,6 +80,8 @@ impl Trie {
         memo[n]
     }
 
+    /// Returns the number of ways you can make
+    /// the towel with the words in the Trie
     pub fn count_possible(&self, towel: &str) -> u64 {
         // this is basically identical to is_possible
         // but without the early exit
