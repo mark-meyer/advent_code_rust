@@ -1,0 +1,105 @@
+
+#[derive(Debug)]
+pub struct Trie {
+    children: [Option<Box<Trie>>; 5],
+    is_word: bool,
+}
+
+impl Trie {
+    pub fn new() -> Self {
+        Trie {
+            children: Default::default(),
+            is_word: false,
+        }
+    }
+
+    fn index_stripe(stripe: char) -> usize {
+        // allos us to use a super sparse children array
+        match stripe {
+            'b' => 0,
+            'g' => 1,
+            'r' => 2,
+            'u' => 3,
+            'w' => 4,
+            _ => panic!("That towel stripe is not allowed in this onsen")
+
+        }
+    }
+
+    pub fn insert(&mut self, towel: &str) {
+        let mut current = self;
+
+        for stripe in towel.chars() {
+            let i = Trie::index_stripe(stripe);
+            current = current.children[i].get_or_insert_with(|| Box::new(Trie::new()));
+        }
+        current.is_word = true;
+
+    }
+
+    pub fn get_prefixes<'a>(&self, towel: &'a str) -> Vec<&'a str>{
+        let mut current = self;
+        let mut prefixes:Vec<&str> = vec![];
+
+        for (len, stripe) in towel.chars().enumerate(){
+            let i = Trie::index_stripe(stripe);
+            
+            if let Some(next) = &current.children[i] {
+                if next.is_word {
+                    prefixes.push(&towel[..=len])
+                }
+                current = next
+            } else {
+                return prefixes
+            }
+        }
+        prefixes
+    }
+
+    pub fn is_possible(&self, towel: &str) -> bool {
+        let n = towel.len();
+        let mut memo = vec![false;n+1];
+        memo[0] = true;
+        for start in 0..n {
+            if memo[start] {
+                for prefix in self.get_prefixes(&towel[start..]) {
+                    let end = start + prefix.len();
+                    memo[end] =true;
+                    if n == end {
+                        return true;
+                    }
+                }
+            }
+        }
+        memo[n]
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_insert() {
+        let mut t = Trie::new();
+        t.insert("bwg");
+        t.insert("bwgr");
+        
+        assert_eq!(t.get_prefixes("bwgrra"), vec!["bwg", "bwgr"]);
+    }
+
+    #[test]
+    fn test_possible() {
+        let mut t = Trie::new();
+        ["r", "wr", "b", "g", "bwu", "rb", "gb", "br"]
+        .iter().for_each(|p| t.insert(p));
+
+        // assert_eq!(t.is_possible("brwrr"), true);
+        // assert_eq!(t.is_possible("bggr"), true);
+        // assert_eq!(t.is_possible("gbbr"), true);
+        // assert_eq!(t.is_possible("rrbgbr"), true);
+       // assert_eq!(t.is_possible("ubwu"), false);
+        // assert_eq!(t.is_possible("bwurrg"), true);
+        // assert_eq!(t.is_possible("brgr"), true);
+        assert_eq!(t.is_possible("bbrgwb"), false);
+    }
+}
