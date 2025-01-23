@@ -18,7 +18,7 @@ fn find_cheats(uv_points:&[((isize, isize), usize)], cheat_length: usize, min_sa
             left += 1;
         }
         for  &((u_next, v_next), end_dist) in &uv_points[left..right+1] {
-            let cheat = max(v.abs_diff(v_next), u.abs_diff(u_next));
+            let cheat = max(v.abs_diff(v_next), u.abs_diff(u_next));   // manhattan distance between the two points
 
             if cheat <= cheat_length                                   // don't go through too many walls
             && start_dist + cheat < end_dist                           // the cheat is actually an improvement
