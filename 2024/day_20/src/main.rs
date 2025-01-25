@@ -3,6 +3,7 @@ use std::fs;
 
 use day_20::*;
 
+
 /// points are (u,v) points to skew them to manhattan distance is axis aligned.
 fn find_cheats(tree:&KdTree<isize, 3>, cheat_length: isize, min_savings:usize) -> usize{
     let mut total = 0;
@@ -29,10 +30,7 @@ fn main() {
     let mut map = Map::from(&s);
     let uv_path =  map.bfs().unwrap();
     
-    let mut kdtree = KdTree{root:None};
-    for &((u, v), d) in &uv_path {
-        kdtree.insert([u, v, d as isize]);
-    }
+    let kdtree:KdTree<isize,3> = uv_path.into(); //  KdTree{root:None};
     
     let part_one = find_cheats(&kdtree, 2, 100);
     println!("Part one: {}", part_one);

@@ -1,4 +1,3 @@
-pub mod kdtree {
 
     pub struct KdIterator<T, const D: usize>  {
         pub current_node: KdTreeNode<T, D> 
@@ -17,7 +16,7 @@ pub mod kdtree {
     }
     
     impl<T, const D: usize> KdTree<T, D> 
-        where  T: PartialOrd + Copy + std::fmt::Display
+        where  T: PartialOrd + Copy + Ord + std::fmt::Display
     {
         pub fn insert(&mut self, value: [T; D]) {
             let mut d = 0;
@@ -75,28 +74,52 @@ pub mod kdtree {
             let mut result = Vec::new();
             let mut stack = vec![(&self.root, 0)]; 
         
-            while let (Some(node), d) = stack.pop().unwrap() {
-                let mut in_range = true;
-                for i in 0..D {
-                    if node.value[i] < min[i] || node.value[i] > (max[i]) {
-                        in_range = false;
-                        break;
+            while !stack.is_empty() {
+                if let (Some(node), d) = stack.pop().unwrap() {
+                    let mut in_range = true;
+                    for i in 0..D {
+                        if node.value[i] < min[i] || node.value[i] > (max[i]) {
+                            in_range = false;
+                            break;
+                        }
                     }
-                }
-                if in_range {                    
-                    result.push(node.value);
-                }
-    
-                if min[d] <= node.value[d] {
-                    stack.push((&node.left, (d + 1) % D));
-                }
-                if max[d] >= node.value[d] {
-                    stack.push((&node.right, (d + 1) % D));
+                    if in_range {                    
+                        result.push(node.value);
+                    }
+        
+                    if min[d] <= node.value[d] {
+                        stack.push((&node.left, (d + 1) % D));
+                    }
+                    if max[d] >= node.value[d] {
+                        stack.push((&node.right, (d + 1) % D));
+                    }
                 }
             }
             result
         }
     } 
+    impl<T, const D:usize> From<Vec<[T; D]>> for KdTree<T, D> 
+        where  T: PartialOrd + Ord + Copy + std::fmt::Display
+    {
+        fn from(mut nodes:Vec<[T; D]>) -> Self {
+            let mut stack = vec![(&mut nodes[..], 0)];
+            let mut tree = KdTree {root: None};
+            while let Some((slice, d)) = stack.pop() {
+                if slice.is_empty() {
+                    continue
+                }
+                slice.sort_by_key(|point| point[d]);
+                let mid = slice.len() / 2;
+                
+                tree.insert(slice[mid]);
+                let (min, max) = slice.split_at_mut(mid);
+                stack.push((min, (d+1) % D));
+                stack.push((&mut max[1..], (d+1) % D));
+            }            
+            tree
+        }
+    }
+    
     
     #[cfg(test)]
     mod test {
@@ -130,4 +153,3 @@ pub mod kdtree {
         
         }
     }
-}
