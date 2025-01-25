@@ -10,8 +10,8 @@ fn find_cheats(tree:&KdTree<isize, 3>, cheat_length: isize, min_savings:usize) -
     for &[u, v, start_dist] in tree.values().iter() {
         
         for  &[u_next, v_next, end_dist] in &tree.range_query(
-                [u - cheat_length , v - cheat_length , 200 as isize ],
-                [u + cheat_length, v + cheat_length , 10000]) {
+                [u - cheat_length , v - cheat_length , start_dist + min_savings as isize],
+                [u + cheat_length, v + cheat_length , isize::MAX]) {
 
             let cheat = max(v.abs_diff(v_next), u.abs_diff(u_next)) as isize;              // manhattan distance between the two points
             
