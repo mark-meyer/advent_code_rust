@@ -1,7 +1,58 @@
 
-    pub struct KdIterator<T, const D: usize>  {
-        pub current_node: KdTreeNode<T, D> 
+    pub struct KdIterator<'a, T, const D: usize>  {
+        pub stack: Vec<&'a Option<Box<KdTreeNode<T, D>>>> 
     }
+    impl<'a, T, const D: usize> Iterator for KdIterator<'a, T, D> {
+        type Item = &'a[T; D];
+
+        fn next(&mut self) -> Option<Self::Item>{
+            while !self.stack.is_empty() {
+                if let Some(node) = self.stack.pop().unwrap() {
+                    self.stack.push(&node.left);
+                    self.stack.push(&node.right);
+                    return Some(&node.value)
+                }
+            }
+            None
+        }
+    }
+
+    pub struct KdRangeIterator<'a, T: PartialOrd + Ord, const D: usize>  {
+        stack: Vec<(&'a Option<Box<KdTreeNode<T, D>>>, usize)>,
+        min: [T;D],
+        max: [T;D] 
+    }
+    impl<'a, T, const D: usize> Iterator for KdRangeIterator<'a, T, D>
+        where T: PartialOrd + Ord
+     {
+        type Item = &'a[T; D];
+
+        fn next(&mut self) -> Option<Self::Item>{
+            while !self.stack.is_empty() {
+                if let (Some(node), d) = self.stack.pop().unwrap() {
+                    let mut in_range = true;
+                    for i in 0..D {
+                        if node.value[i] < self.min[i] || node.value[i] > self.max[i] {
+                            in_range = false;
+                            break;
+                        }
+                    }
+                            
+                    if self.min[d] <= node.value[d] {
+                        self.stack.push((&node.left, (d + 1) % D));
+                    }
+                    if self.max[d] >= node.value[d] {
+                        self.stack.push((&node.right, (d + 1) % D));
+                    }
+                    if in_range {                    
+                        return Some(&node.value);
+                    }
+                }
+            }
+            None
+        }
+    }
+
 
     #[derive(Debug)]
     pub struct KdTree<T, const D: usize> {
@@ -18,6 +69,10 @@
     impl<T, const D: usize> KdTree<T, D> 
         where  T: PartialOrd + Copy + Ord + std::fmt::Display
     {
+        pub fn iter(&self) -> KdIterator<T,D> {
+            KdIterator{stack: vec![&self.root]}
+        }
+
         pub fn insert(&mut self, value: [T; D]) {
             let mut d = 0;
             let mut current = &mut self.root;
@@ -70,34 +125,14 @@
             None
         }
 
-        pub fn range_query(&self, min: [T; D], max: [T; D]) -> Vec<[T; D]> {
-            let mut result = Vec::new();
-            let mut stack = vec![(&self.root, 0)]; 
-        
-            while !stack.is_empty() {
-                if let (Some(node), d) = stack.pop().unwrap() {
-                    let mut in_range = true;
-                    for i in 0..D {
-                        if node.value[i] < min[i] || node.value[i] > (max[i]) {
-                            in_range = false;
-                            break;
-                        }
-                    }
-                    if in_range {                    
-                        result.push(node.value);
-                    }
-        
-                    if min[d] <= node.value[d] {
-                        stack.push((&node.left, (d + 1) % D));
-                    }
-                    if max[d] >= node.value[d] {
-                        stack.push((&node.right, (d + 1) % D));
-                    }
-                }
+        pub fn range_query(&self, min: [T; D], max: [T; D]) -> KdRangeIterator<T, D> {
+            KdRangeIterator {
+                stack:vec![(&self.root, 0)],
+                min,
+                max
             }
-            result
-        }
-    } 
+        } 
+    }
     impl<T, const D:usize> From<Vec<[T; D]>> for KdTree<T, D> 
         where  T: PartialOrd + Ord + Copy + std::fmt::Display
     {
@@ -139,8 +174,8 @@
             let mut kd = KdTree{root:None};
             kd.insert([6, -4, 2]);
         
-            let res = kd.range_query([2, -4, -10], [6,0, 20]);
-            assert_eq!(res, vec![[6,-4, 2]])
+            let mut res = kd.range_query([2, -4, -10], [6,0, 20]);
+            assert_eq!(res.next(), Some(&[6,-4, 2]))
         }
         #[test]
         fn test_values() {

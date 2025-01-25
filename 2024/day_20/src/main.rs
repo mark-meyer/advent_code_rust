@@ -8,9 +8,9 @@ use day_20::*;
 fn find_cheats(tree:&KdTree<isize, 3>, cheat_length: isize, min_savings:usize) -> usize{
     let mut total = 0;
 
-    for &[u, v, start_dist] in tree.values().iter() {
+    for &[u, v, start_dist] in tree.iter() {
         
-        for  &[u_next, v_next, end_dist] in &tree.range_query(
+        for  &[u_next, v_next, end_dist] in tree.range_query(
                 [u - cheat_length , v - cheat_length , start_dist + min_savings as isize],
                 [u + cheat_length, v + cheat_length , isize::MAX]) {
 
@@ -30,7 +30,7 @@ fn main() {
     let mut map = Map::from(&s);
     let uv_path =  map.bfs().unwrap();
     
-    let kdtree:KdTree<isize,3> = uv_path.into(); //  KdTree{root:None};
+    let kdtree:KdTree<isize,3> = uv_path.into();
     
     let part_one = find_cheats(&kdtree, 2, 100);
     println!("Part one: {}", part_one);
