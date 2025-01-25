@@ -124,7 +124,7 @@ where
         None
     }
 
-    pub fn range_query(&self, min: [T; D], max: [T; D]) -> KdRangeIterator<T, D> {
+    pub fn range_query(&self, min: [T; D], max: [T; D]) -> impl Iterator<Item = &'_ [T; D]>  {
         KdRangeIterator {
             stack: vec![(&self.root, 0)],
             min,
