@@ -1,5 +1,5 @@
 use std::num::ParseIntError;
-use std::collections::{HashSet, HashMap};
+use std::collections::HashMap;
 use itertools::Itertools;
 
 
@@ -8,32 +8,27 @@ pub struct SecretNumber(pub i64);
 
 impl SecretNumber {
 
-    pub fn add_prices(
-        &self, iterations:usize, 
-        global_counts:&mut HashMap<(i64, i64, i64, i64), i64>)  {
+    pub fn add_prices(&self, iterations:usize) ->  HashMap<(i8, i8, i8, i8), i64> {
         
-        let mut seen = HashSet::new();
+        let mut local_prices = HashMap::new();
 
         let tups = self
-        .tuple_windows()
-        .map(|(a, b)| b % 10 - a % 10)
-        .tuple_windows::<(_, _, _, _)>();
+            .tuple_windows()
+            .map(|(a, b)| (b % 10 - a % 10) as i8)
+            .tuple_windows::<(_, _, _, _)>();
         
         self
-        .skip(4)
-        .map(|n| n % 10)
-        .zip(tups)
-        .take(iterations)
-        .for_each(|(price, diffs)| {
-            if !seen.contains(&diffs) {
-                global_counts.entry(diffs)
-                .and_modify(|total| *total += price)
-                .or_insert(price);
-    
-                seen.insert(diffs);
-            }
-        } );
-
+            .skip(4)
+            .map(|n| (n % 10))
+            .zip(tups)
+            .take(iterations)
+            .for_each(|(price, diffs)| {
+                if !local_prices.contains_key(&diffs) {
+                    local_prices.insert(diffs, price);
+                } 
+            } );
+            
+        local_prices
     }
 }
 

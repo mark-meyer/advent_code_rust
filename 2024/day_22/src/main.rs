@@ -2,6 +2,8 @@ use std::fs::File;
 use std::collections::HashMap;
 use std::io::{BufReader, BufRead};
 use std::error::Error;
+use rayon::prelude::*;
+
 use day_22::*;
 
 fn parse_input(f:File) -> Result<Vec<SecretNumber>, Box<dyn Error>> {
@@ -21,11 +23,19 @@ fn part_one(numbers: &[SecretNumber]) -> i64 {
         .sum()
 }
 
-fn part_two(numbers: &[SecretNumber]) -> ((i64, i64, i64, i64), i64) {
-    let mut global_counts = HashMap::new();
-    for number in numbers.iter() {
-        number.add_prices(2000, &mut global_counts);
-    }
+fn part_two(numbers: &[SecretNumber]) -> ((i8, i8, i8, i8), i64) {
+    let global_counts = numbers
+    .par_iter()
+    .map(|number| number.add_prices(2000))
+    .reduce(|| HashMap::new(),
+        |mut acc, local_counts| {
+            for (diffs, price) in local_counts {
+                *acc.entry(diffs).or_insert(0_i64) += price as i64;
+            }
+            acc
+        }
+    );
+
     global_counts.into_iter().max_by_key(|entry| entry.1).unwrap()
 }
 
