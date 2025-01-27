@@ -23,14 +23,14 @@ fn part_one(numbers: &[i64]) -> i64 {
         .sum()
 }
 
-fn part_two(numbers: &[i64]) -> ((i8, i8, i8, i8), i64) {
+fn part_two(numbers: &[i64]) -> (u32, i64) {
     let global_counts = numbers
     .par_iter()
     .map(|number| add_prices(*number, 2000))
     .reduce(|| HashMap::new(),
         |mut acc, local_counts| {
             for (diffs, price) in local_counts {
-                *acc.entry(diffs).or_insert(0_i64) += price as i64;
+                *acc.entry(diffs).or_insert(0_i64) += price as i64;   
             }
             acc
         }
