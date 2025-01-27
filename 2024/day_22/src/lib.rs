@@ -1,89 +1,74 @@
-use std::num::ParseIntError;
 use std::collections::HashMap;
 use itertools::Itertools;
 
 
-#[derive(Debug, Clone, Copy)]
-pub struct SecretNumber(pub i64);
-
-impl SecretNumber {
-
-    pub fn add_prices(&self, iterations:usize) ->  HashMap<(i8, i8, i8, i8), i64> {
-        
-        let mut local_prices = HashMap::new();
-
-        let tups = self
-            .tuple_windows()
-            .map(|(a, b)| (b % 10 - a % 10) as i8)
-            .tuple_windows::<(_, _, _, _)>();
-        
-        self
-            .skip(4)
-            .map(|n| (n % 10))
-            .zip(tups)
-            .take(iterations)
-            .for_each(|(price, diffs)| {
-                if !local_prices.contains_key(&diffs) {
-                    local_prices.insert(diffs, price);
-                } 
-            } );
-            
-        local_prices
-    }
-}
-
-impl TryFrom::<String> for SecretNumber {
-    type Error = ParseIntError;
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        value.parse::<i64>().map(SecretNumber)
-    }
-}
-
-impl Iterator for SecretNumber {
-    type Item=i64;
-    fn next(&mut self) -> Option<i64> {
-        let orig = self.0;
-        let m = self.0 * 64;
-        // mix
-        self.0 = self.0 ^ m;
-        // prune
-        self.0 %= 16777216;
+fn next(orig:i64) -> i64 {
+    let mut orig = orig ^ orig * 64  % 16777216;
+    orig = orig ^ orig / 32 % 16777216;
     
-        let m = self.0 / 32;
-        self.0 = self.0 ^ m;
-        self.0 %= 16777216;
+    orig ^  orig * 2048 % 16777216
+}
+
+pub fn nth_next(number:i64, iterations: usize) -> i64 {
+    let mut current = number;
+    for _ in 0..iterations {
+        current = next(current);
+    }
+    current
+}
+
+pub fn add_prices(n: i64, iterations:usize) ->  HashMap<(i8, i8, i8, i8), i64> {
     
-        let m = self.0 * 2048;
-        self.0 = self.0 ^ m;
-        self.0 %= 16777216;
-        Some(orig)
+    let mut local_prices = HashMap::new();
+    let mut current = n;
+    
+    let mut diffs:(i8, i8, i8, i8) = (0..4)
+    .map(|_| {
+        let next_secret = current;
+        current = next(current);
+        (current % 10  - next_secret % 10) as i8
+    })
+    .collect_tuple().unwrap();
+
+    local_prices.insert(diffs, current % 10);
+
+    for _ in 0..iterations - 4 {
+        let next_secret = current;
+        current = next(current);
+        diffs = (
+            diffs.1,
+            diffs.2,
+            diffs.3,
+            (current % 10  - next_secret % 10) as i8
+        );
+        if !local_prices.contains_key(&diffs) {
+            local_prices.insert(diffs, current % 10);
+        } 
     }
+
+    local_prices
 }
 
-impl From<SecretNumber> for i64 {
-    fn from(num: SecretNumber) -> Self {
-        num.0
-    }
-}
 
 
-#[cfg(test)]
-mod test {
-    use super::*;
 
-    #[test]
-    fn test_next() {
-        let n = SecretNumber(123);
-        assert_eq!(n.skip(2).next(), Some(16495136));
+// #[cfg(test)]
+// mod test {
+//     use super::*;
 
-        let n = SecretNumber(10);
-        assert_eq!(n.skip(2000).next(), Some(4700978));
-    }
+    // #[test]
+    // fn test_next() {
+    //     let n = SecretNumber(123);
+    //     assert_eq!(n.skip(2).next(), Some(16495136));
 
-    #[test]
-    fn test_from_string() {
-        let s = "1234".to_string();
-        let n = SecretNumber::try_from(s).unwrap();
-        assert_eq!(1234, n.0)
-    }
-}
+    //     let n = SecretNumber(10);
+    //     assert_eq!(n.skip(2000).next(), Some(4700978));
+    // }
+
+    // #[test]
+    // fn test_from_string() {
+    //     let s = "1234".to_string();
+    //     let n = SecretNumber::try_from(s).unwrap();
+    //     assert_eq!(1234, n.0)
+    // }
+// }

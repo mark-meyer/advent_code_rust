@@ -6,27 +6,27 @@ use rayon::prelude::*;
 
 use day_22::*;
 
-fn parse_input(f:File) -> Result<Vec<SecretNumber>, Box<dyn Error>> {
+fn parse_input(f:File) -> Result<Vec<i64>, Box<dyn Error>> {
     BufReader::new(f)
     .lines()
     .map(|line| {
-        SecretNumber::try_from(line?)
+        line?.parse()
         .map_err(|_| "Bad number!".into())
     })
     .collect()
 }
 
-fn part_one(numbers: &[SecretNumber]) -> i64 {
+fn part_one(numbers: &[i64]) -> i64 {
     numbers
         .iter()
-        .flat_map(|n| n.skip(2000).take(1))
+        .map(|n| nth_next(*n, 2000))
         .sum()
 }
 
-fn part_two(numbers: &[SecretNumber]) -> ((i8, i8, i8, i8), i64) {
+fn part_two(numbers: &[i64]) -> ((i8, i8, i8, i8), i64) {
     let global_counts = numbers
     .par_iter()
-    .map(|number| number.add_prices(2000))
+    .map(|number| add_prices(*number, 2000))
     .reduce(|| HashMap::new(),
         |mut acc, local_counts| {
             for (diffs, price) in local_counts {
@@ -35,7 +35,6 @@ fn part_two(numbers: &[SecretNumber]) -> ((i8, i8, i8, i8), i64) {
             acc
         }
     );
-
     global_counts.into_iter().max_by_key(|entry| entry.1).unwrap()
 }
 
