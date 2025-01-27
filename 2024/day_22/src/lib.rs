@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use ahash::AHashMap;
 
 
 const KEY_SIZE:u32 = 4;
@@ -29,9 +29,9 @@ fn shift_in(n:i8, key:u32) -> u32 {
     ((key << BITS_PER_SLOT) | n) & MASK
 }
 
-pub fn add_prices(n: i64, iterations:usize) ->  HashMap<u32, i64> {
+pub fn add_prices(n: i64, iterations:usize) ->  AHashMap<u32, i64> {
     
-    let mut local_prices = HashMap::new();
+    let mut local_prices = AHashMap::new();
     let mut current = n;
     let mut key = 0;
 

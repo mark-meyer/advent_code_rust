@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::collections::HashMap;
+use ahash::AHashMap;
 use std::io::{BufReader, BufRead};
 use std::error::Error;
 use rayon::prelude::*;
@@ -27,7 +27,7 @@ fn part_two(numbers: &[i64]) -> (u32, i64) {
     let global_counts = numbers
     .par_iter()
     .map(|number| add_prices(*number, 2000))
-    .reduce(|| HashMap::new(),
+    .reduce(|| AHashMap::new(),
         |mut acc, local_counts| {
             for (diffs, price) in local_counts {
                 *acc.entry(diffs).or_insert(0_i64) += price as i64;   
