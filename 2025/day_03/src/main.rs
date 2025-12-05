@@ -42,7 +42,7 @@ fn main() {
 
 
 #[cfg(test)]
-mod tets {
+mod test {
 use super::*;
 
 #[test]
