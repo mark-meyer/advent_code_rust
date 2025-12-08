@@ -1,4 +1,5 @@
 use std::fs::read_to_string;
+use std::mem::swap;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum Cell {
@@ -20,34 +21,43 @@ fn parse_file(s:&str) -> Manifold {
     .collect()
 }
 
-fn run_transporter_two(m: &Manifold) -> (u64, usize) {
-    let h = m.len();
+fn run_transporter_two(m: &Manifold) -> (u64, u64) {
     let w = m[0].len();
     // Keep track of used spliters
     let mut used_splitters = 0;
 
     // DP record
-    let mut record = vec![vec![0; w]; h];
-    let start = m[0].iter().position(|&c| c ==  Cell::Beam).unwrap();
-    record[0][start] = 1;
+    let mut prev_counts = vec![0u64; w];
+    let mut curr_counts = vec![0u64; w];
 
-    for (row, line) in m.iter().enumerate().skip(1) {
-        for (col, cell) in line.iter().enumerate() {      
+    
+    let start = m[0].iter().position(|&c| c ==  Cell::Beam).unwrap();
+    prev_counts[start] = 1;
+
+    for line in m.iter().skip(1) {
+        curr_counts.fill(0);
+        for (col, cell) in line.iter().enumerate() {   
+            let incoming_beam = prev_counts[col];
+            if incoming_beam == 0 {
+                continue
+            }
             match cell {
-                Cell::Space => record[row][col] = record[row-1][col] + record[row][col],
+                Cell::Space => curr_counts[col] += incoming_beam,
                 Cell::Beam => (),
                 Cell::Splitter=> {
-                    record[row][col-1] = record[row][col-1] + record[row-1][col];
-                    record[row][col+1] = record[row][col+1] + record[row-1][col];
-                    if record[row-1][col] > 0 {
+                    // splitters never happen on edges ftw!
+                    curr_counts[col - 1] += incoming_beam;
+                    curr_counts[col + 1] += incoming_beam;
+                    if incoming_beam > 0 {
                         used_splitters += 1
                     }
                 }
             }
         }
+        swap(&mut prev_counts, &mut curr_counts);
     }
-    (record[h-1].iter().sum(), used_splitters)
 
+    (curr_counts.iter().sum(), used_splitters)
 }
 
 
