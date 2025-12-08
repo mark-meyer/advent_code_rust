@@ -30,12 +30,10 @@ fn run_transporter_two(m: &Manifold) -> (u64, usize) {
     // DP record
     let mut record = vec![vec![0; w]; h];
     let start = m[0].iter().position(|c| matches!(c, Cell::Beam)).unwrap();
-
     record[0][start] = 1;
 
     for (row, line) in m.iter().enumerate().skip(1) {
-        for (col, cell) in line.iter().enumerate() {
-            
+        for (col, cell) in line.iter().enumerate() {      
             match cell {
                 Cell::Space => record[row][col] = record[row-1][col] + record[row][col],
                 Cell::Beam => (),
@@ -57,7 +55,6 @@ fn run_transporter_two(m: &Manifold) -> (u64, usize) {
 fn main() {
     let raw_input = read_to_string("data.txt").expect("Couldn't start the tachyon emiiter");
     let manifold = parse_file(raw_input);
-
 
     let (paths, splits) = run_transporter_two(&manifold);
     println!("Part one: {}", splits);
