@@ -1,6 +1,6 @@
 use std::fs::read_to_string;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 enum Cell {
     Beam,
     Splitter,
@@ -28,7 +28,7 @@ fn run_transporter_two(m: &Manifold) -> (u64, usize) {
 
     // DP record
     let mut record = vec![vec![0; w]; h];
-    let start = m[0].iter().position(|c| matches!(c, Cell::Beam)).unwrap();
+    let start = m[0].iter().position(|&c| c ==  Cell::Beam).unwrap();
     record[0][start] = 1;
 
     for (row, line) in m.iter().enumerate().skip(1) {
