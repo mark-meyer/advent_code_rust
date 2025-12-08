@@ -1,5 +1,4 @@
 use std::fs::read_to_string;
-use std::collections::HashSet;
 
 #[derive(Debug, Clone, Copy)]
 enum Cell {
@@ -25,7 +24,7 @@ fn run_transporter_two(m: &Manifold) -> (u64, usize) {
     let h = m.len();
     let w = m[0].len();
     // Keep track of used spliters
-    let mut used_splitters = HashSet::new();
+    let mut used_splitters = 0;
 
     // DP record
     let mut record = vec![vec![0; w]; h];
@@ -41,13 +40,13 @@ fn run_transporter_two(m: &Manifold) -> (u64, usize) {
                     record[row][col-1] = record[row][col-1] + record[row-1][col];
                     record[row][col+1] = record[row][col+1] + record[row-1][col];
                     if record[row-1][col] > 0 {
-                        used_splitters.insert((row, col));
+                        used_splitters += 1
                     }
                 }
             }
         }
     }
-    (record[h-1].iter().sum(), used_splitters.len())
+    (record[h-1].iter().sum(), used_splitters)
 
 }
 
