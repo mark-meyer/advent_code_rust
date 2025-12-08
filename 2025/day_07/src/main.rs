@@ -9,7 +9,7 @@ enum Cell {
 
 type Manifold = Vec<Vec<Cell>>;
 
-fn parse_file(s:String) -> Manifold {
+fn parse_file(s:&str) -> Manifold {
     s.lines().map(|line| line.chars().map(|c| match c {
         '^' => Cell::Splitter,
         'S' => Cell::Beam,
@@ -53,7 +53,7 @@ fn run_transporter_two(m: &Manifold) -> (u64, usize) {
 
 fn main() {
     let raw_input = read_to_string("data.txt").expect("Couldn't start the tachyon emiiter");
-    let manifold = parse_file(raw_input);
+    let manifold = parse_file(&raw_input);
 
     let (paths, splits) = run_transporter_two(&manifold);
     println!("Part one: {}", splits);
