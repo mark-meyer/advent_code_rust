@@ -283,7 +283,7 @@ pub struct UF<T> {
 }
 
 impl<T> UF<T>
-where  T: Hash + Eq + Clone {
+where  T: Hash + Eq + Copy {
     pub fn new() -> Self {
         Self {
             parents: HashMap::new(),
@@ -291,25 +291,25 @@ where  T: Hash + Eq + Clone {
             num_components: 0
         }
     }
-    pub fn find(&mut self, node: &T) -> T {
-        if !self.parents.contains_key(node) {
-            self.parents.insert(node.clone(), node.clone());
-            self.sizes.insert(node.clone(), 1);
+    pub fn find(&mut self, node: T) -> T {
+        if !self.parents.contains_key(&node) {
+            self.parents.insert(node, node);
+            self.sizes.insert(node, 1);
             self.num_components += 1;
-            return node.clone();
+            return node;
         }
-        let parent = self.parents.get(node).unwrap().clone();
-        if parent !=  * node {
-            let root = self.find(&parent);
-            self.parents.insert(node.clone(), root.clone());
+        let parent = self.parents.get(&node).unwrap();
+        if parent !=  &node {
+            let root = self.find(*parent);
+            self.parents.insert(node, root);
             return root;
         }
-        node.clone()
+        node
     }
 
     pub fn union(&mut self, node_a: T, node_b: T) -> bool {
-        let root_a = self.find(&node_a);
-        let root_b = self.find(&node_b);
+        let root_a = self.find(node_a);
+        let root_b = self.find(node_b);
 
         if root_a == root_b {
             return false;
@@ -320,17 +320,17 @@ where  T: Hash + Eq + Clone {
         
         // Union by Size: Merge the smaller set into the larger one
         if size_a < size_b {
-            self.parents.insert(root_a, root_b.clone());
+            self.parents.insert(root_a, root_b);
             self.sizes.insert(root_b, new_total_size);
         } else {
-            self.parents.insert(root_b, root_a.clone());
+            self.parents.insert(root_b, root_a);
             self.sizes.insert(root_a, new_total_size);
         }
 
         self.num_components -= 1;
         true
     }
-    pub fn get_component_size(&mut self, node: &T) -> usize {
+    pub fn get_component_size(&mut self, node: T) -> usize {
         let root = self.find(node);
         *self.sizes.get(&root).unwrap_or(&0)
     }
@@ -378,7 +378,7 @@ pub fn part_two(tree: &KDTree, target_size: usize) -> i64 {
     for (_dist, p1, p2) in pairs {
         uf.union(p1.coords, p2.coords);
         if uf.sizes.len() == 1  {
-            let p = uf.find(&p1.coords);
+            let p = uf.find(p1.coords);
             if let Some(&size) = uf.sizes.get(&p) {
                 if target_size == size {
                     return p1.coords[0] * p2.coords[0];
