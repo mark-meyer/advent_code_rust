@@ -171,14 +171,6 @@ impl<'a, const D: usize> ClosestPairIterator<'a, D> {
         Self { heap }
     }
 
-    fn dist_sq(p1: &Point<D>, p2: &Point<D>) -> u64 {
-        let mut d: u64 = 0;
-        for i in 0..D {
-            let diff = (p1.coords[i] - p2.coords[i]).abs() as u64;
-            d += diff * diff;
-        }
-        d
-    }
     fn size(bounding_box: &BoundingBox<D>) -> i64 {
         (0..D).fold(0, |a, idx| a + bounding_box.max[idx] - bounding_box.min[idx])
     }
@@ -200,7 +192,7 @@ impl<'a, const D: usize> Iterator for ClosestPairIterator<'a, D> {
 
                 QueueItem::PointNode(_, p, node) => {
                     // 1. Compare P vs Node.point
-                    let d = Self::dist_sq(p, &node.point);
+                    let d = p.square_distance(&node.point);
                     self.heap.push(QueueItem::PointPair(d, p, &node.point));
 
                     // 2. Compare P vs Node.left
