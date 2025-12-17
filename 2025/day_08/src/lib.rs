@@ -304,8 +304,8 @@ where  T: Hash + Eq + Copy {
         if root_a == root_b {
             return false;
         }
-        let size_a = self.sizes.remove(&root_a).unwrap_or(1);
-        let size_b = self.sizes.remove(&root_b).unwrap_or(1);
+        let size_a = self.sizes.remove(&root_a).expect("root must have a size entry");
+        let size_b = self.sizes.remove(&root_b).expect("root must have a size entry");
         let new_total_size = size_a + size_b;
         
         // Union by Size: Merge the smaller set into the larger one
