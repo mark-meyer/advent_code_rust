@@ -1,4 +1,4 @@
-use std::collections::{BinaryHeap, HashMap};
+use std::collections::BinaryHeap;
 use std::cmp::Ordering;
 use std::hash::Hash;
 use std::io::{BufRead, BufReader};
@@ -266,63 +266,47 @@ impl<'a, const D: usize> Iterator for ClosestPairIterator<'a, D> {
     }
 }
 
-pub struct UF<T> {
-    pub parents: HashMap<T, T>,
-    pub sizes: HashMap<T, usize>,
+pub struct UnionFind {
+    pub parent: Vec<usize>,
+    pub sizes: Vec<usize>,
     pub num_components: usize,
 }
 
-impl<T> UF<T>
-where  T: Hash + Eq + Copy {
-    pub fn new() -> Self {
+impl UnionFind {
+    pub fn new(n: usize) -> Self {
         Self {
-            parents: HashMap::new(),
-            sizes:HashMap::new(),
-            num_components: 0
+            parent: (0..n).collect(),
+            sizes:vec![1;n],
+            num_components: n
         }
     }
-    pub fn find(&mut self, node: T) -> T {
-        if !self.parents.contains_key(&node) {
-            self.parents.insert(node, node);
-            self.sizes.insert(node, 1);
-            self.num_components += 1;
-            return node;
+    pub fn find(&mut self, node: usize) -> usize {
+        if self.parent[node] != node {
+            let root = self.find(self.parent[node]);
+            self.parent[node] = root;
         }
-        let parent = self.parents.get(&node).unwrap();
-        if parent !=  &node {
-            let root = self.find(*parent);
-            self.parents.insert(node, root);
-            return root;
-        }
-        node
+        self.parent[node]
     }
 
-    pub fn union(&mut self, node_a: T, node_b: T) -> bool {
-        let root_a = self.find(node_a);
-        let root_b = self.find(node_b);
+    pub fn union(&mut self, a: usize, b: usize) -> bool {
+        let mut root_a = self.find(a);
+        let mut root_b = self.find(b);
 
         if root_a == root_b {
             return false;
         }
-        let size_a = self.sizes.remove(&root_a).expect("root must have a size entry");
-        let size_b = self.sizes.remove(&root_b).expect("root must have a size entry");
-        let new_total_size = size_a + size_b;
-        
-        // Union by Size: Merge the smaller set into the larger one
-        if size_a < size_b {
-            self.parents.insert(root_a, root_b);
-            self.sizes.insert(root_b, new_total_size);
-        } else {
-            self.parents.insert(root_b, root_a);
-            self.sizes.insert(root_a, new_total_size);
+        if self.sizes[root_a] < self.sizes[root_b] {
+            std::mem::swap(&mut root_a, &mut root_b);
         }
-
+        self.parent[root_b] = root_a;
+        self.sizes[root_a] += self.sizes[root_b];
         self.num_components -= 1;
         true
     }
-    pub fn get_component_size(&mut self, node: T) -> usize {
+
+    pub fn get_component_size(&mut self, node: usize) -> usize {
         let root = self.find(node);
-        *self.sizes.get(&root).unwrap_or(&0)
+        self.sizes[root]
     }
 }
 
@@ -357,30 +341,27 @@ pub fn make_kd_tree<const D: usize>(coords: &Vec<[i64; D]>) -> KDTree<D> {
     KDTree::new( points)
 }
 
-pub fn part_one(tree: &KDTree<3>, iterations: usize) -> usize {
+pub fn part_one(tree: &KDTree<3>, iterations: usize, num_points:usize) -> usize {
     let pairs = ClosestPairIterator::new(&tree);
-    let mut uf: UF<[i64; 3]> = UF::new();
+    let mut uf: UnionFind = UnionFind::new(num_points);
 
     for (_dist, p1, p2) in pairs.take(iterations) {
-        uf.union(p1.coords, p2.coords);
+        uf.union(p1.id, p2.id);
     }
-    uf.sizes.values().k_largest(3).product()
+    uf.sizes.iter().k_largest(3).product()
 }
 
-pub fn part_two(tree: &KDTree<3>, target_size: usize) -> i64 {
+pub fn part_two(tree: &KDTree<3>, target_size: usize, num_points:usize) -> i64 {
     let pairs = ClosestPairIterator::new(&tree);
-    let mut uf: UF<[i64; 3]> = UF::new();
+    let mut uf: UnionFind = UnionFind::new(num_points);
 
     for (_dist, p1, p2) in pairs {
-        uf.union(p1.coords, p2.coords);
-        if uf.sizes.len() == 1  {
-            let p = uf.find(p1.coords);
-            if let Some(&size) = uf.sizes.get(&p) {
-                if target_size == size {
+        uf.union(p1.id, p2.id);
+        if uf.num_components == 1  {
+            let p = uf.find(p1.id);
+            if target_size == uf.sizes[p] {
                     return p1.coords[0] * p2.coords[0];
-                }
             }
-           
         }
     }
     panic!("No answer found")

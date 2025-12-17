@@ -23,14 +23,14 @@ fn bench_part_two(c: &mut Criterion) {
 
     c.bench_function("part_two", |b| {
         b.iter(|| {
-            let removed = part_two(black_box(&tree), 1000);
+            let removed = part_two(black_box(&tree), 1000, 1000);
             black_box(removed);
         })
     });
 
     c.bench_function("part_one", |b| {
         b.iter(|| {
-            let removed = part_one(black_box(&tree), 1000);
+            let removed = part_one(black_box(&tree), 1000, 1000);
             black_box(removed);
         })
     });
