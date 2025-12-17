@@ -7,32 +7,32 @@ use std::fs::File;
 use itertools::Itertools;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Point {
-    pub coords: [i64; 3],
+pub struct Point<const D: usize> {
+    pub coords: [i64; D],
     pub id: usize
 }
 
-impl Point {
-    pub fn square_distance(&self, other: &Point) -> u64 {
+impl<const D:usize> Point<D>  {
+    pub fn square_distance(&self, other: &Point<D>) -> u64 {
         self.coords.iter().zip(other.coords.iter())
         .map(|(a, b)| a.abs_diff(*b).pow(2))
         .sum()
     }
 }
 
-pub struct BoundingBox {
-    pub min: [i64; 3],
-    pub max: [i64; 3],
+pub struct BoundingBox<const D: usize> {
+    pub min: [i64; D],
+    pub max: [i64; D],
 }
 
-impl BoundingBox {
-    pub fn from_points(points: &[Point]) -> Self {
+impl<const D: usize> BoundingBox<D> {
+    pub fn from_points(points: &[Point<D>]) -> Self {
         if points.is_empty() {
-            return BoundingBox { min: [0; 3], max: [0; 3] };
+            return BoundingBox { min: [0; D], max: [0; D] };
         }
 
-        let mut min = [i64::MAX; 3];
-        let mut max = [i64::MIN; 3];
+        let mut min = [i64::MAX; D];
+        let mut max = [i64::MIN; D];
 
         for p in points {
             for (i, v) in p.coords.iter().enumerate() {
@@ -43,9 +43,9 @@ impl BoundingBox {
         BoundingBox { min, max }
     }
 
-    pub fn min_dist_sq(&self, other: &BoundingBox) -> u64 {
+    pub fn min_dist_sq(&self, other: &BoundingBox<D>) -> u64 {
         let mut dist: u64 = 0;
-        for i in 0..3 {
+        for i in 0..D {
             let d = if other.max[i] < self.min[i] {
                 (self.min[i] - other.max[i]) as u64
             } else if self.max[i] < other.min[i] {
@@ -59,9 +59,9 @@ impl BoundingBox {
     }
 
     // Distance from a single point to this box
-    pub fn dist_sq_point(&self, p: &Point) -> u64 {
+    pub fn dist_sq_point(&self, p: &Point<D>) -> u64 {
         let mut dist_sq = 0;
-        for i in 0..3 {
+        for i in 0..D {
             let v = p.coords[i];
             if v < self.min[i] {
                 let d = (self.min[i] - v) as u64;
@@ -75,30 +75,30 @@ impl BoundingBox {
     }
 }
 
-pub struct  KDTreeNode {
-    pub point: Point,
-    pub bounding_box: BoundingBox,
-    pub left: Option<Box<KDTreeNode>>,
-    pub right: Option<Box<KDTreeNode>>
+pub struct KDTreeNode<const D: usize> {
+    pub point: Point<D>,
+    pub bounding_box: BoundingBox<D>,
+    pub left: Option<Box<KDTreeNode<D>>>,
+    pub right: Option<Box<KDTreeNode<D>>>
 }
 
 #[derive(Default)]
-pub struct KDTree {
-    pub root: Option<Box<KDTreeNode>>
+pub struct KDTree<const D: usize> {
+    pub root: Option<Box<KDTreeNode<D>>>
 }
 
-impl KDTree {
-    pub fn new(mut points: Vec<Point>) -> Self {
+impl<const D: usize> KDTree<D> {
+    pub fn new(mut points: Vec<Point<D>>) -> Self {
         let root = Self::build_recursive(&mut points, 0);
         KDTree { root }
     }
 
-    pub fn build_recursive(points: &mut [Point], depth: usize) -> Option<Box<KDTreeNode>> {
+    pub fn build_recursive(points: &mut [Point<D>], depth: usize) -> Option<Box<KDTreeNode<D>>> {
         if points.is_empty() {
             return None;
         }
 
-        let dim = depth % 3;
+        let dim = depth % D;
         let median_idx = points.len() / 2;
 
         points.select_nth_unstable_by_key(median_idx, |p| {p.coords[dim]});
@@ -120,22 +120,22 @@ impl KDTree {
     }
 }
 
-enum QueueItem<'a> {
+enum QueueItem<'a, const D: usize> {
     // store ids of points to help avoid dupes like (A, B) (B, A)
-    PointPair(u64, &'a Point, &'a Point),
-    NodeNode(u64, &'a KDTreeNode, &'a KDTreeNode),
-    PointNode(u64, &'a Point, &'a KDTreeNode)
+    PointPair(u64, &'a Point<D>, &'a Point<D>),
+    NodeNode(u64, &'a KDTreeNode<D>, &'a KDTreeNode<D>),
+    PointNode(u64, &'a Point<D>, &'a KDTreeNode<D>)
 }
 
-impl<'a> PartialEq for QueueItem<'a> {
+impl<'a, const D: usize> PartialEq for QueueItem<'a, D> {
     fn eq(&self, other: &Self) -> bool {
         self.cmp(other) == Ordering::Equal
     }
 }
 
-impl<'a> Eq for QueueItem<'a> {}
+impl<'a, const D: usize> Eq for QueueItem<'a, D> {}
 
-impl<'a> Ord for QueueItem<'a> {
+impl<'a, const D: usize> Ord for QueueItem<'a, D> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         let key_self = match self {
             QueueItem::PointPair(d, ..) => (*d, 0),
@@ -151,18 +151,18 @@ impl<'a> Ord for QueueItem<'a> {
     }
 }
 
-impl<'a> PartialOrd for QueueItem<'a> {
+impl<'a, const D: usize> PartialOrd for QueueItem<'a, D> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-pub struct ClosestPairIterator<'a> {
-    heap: BinaryHeap<QueueItem<'a>>
+pub struct ClosestPairIterator<'a, const D: usize> {
+    heap: BinaryHeap<QueueItem<'a, D>>
 }
 
-impl<'a> ClosestPairIterator<'a> {
-    pub fn new(tree: &'a KDTree) -> Self {
+impl<'a, const D: usize> ClosestPairIterator<'a, D> {
+    pub fn new(tree: &'a KDTree<D>) -> Self {
         let mut heap = BinaryHeap::new();
 
         if let Some(root) = &tree.root {
@@ -171,23 +171,21 @@ impl<'a> ClosestPairIterator<'a> {
         Self { heap }
     }
 
-    fn dist_sq(p1: &Point, p2: &Point) -> u64 {
+    fn dist_sq(p1: &Point<D>, p2: &Point<D>) -> u64 {
         let mut d: u64 = 0;
-        for i in 0..3 {
+        for i in 0..D {
             let diff = (p1.coords[i] - p2.coords[i]).abs() as u64;
             d += diff * diff;
         }
         d
     }
-    fn size(aabb: &BoundingBox) -> i64 {
-        (aabb.max[0] - aabb.min[0]) + 
-        (aabb.max[1] - aabb.min[1]) + 
-        (aabb.max[2] - aabb.min[2])
+    fn size(bounding_box: &BoundingBox<D>) -> i64 {
+        (0..D).fold(0, |a, idx| a + bounding_box.max[idx] - bounding_box.min[idx])
     }
 }
 
-impl<'a> Iterator for ClosestPairIterator<'a> {
-    type Item = (u64, &'a Point, &'a Point);
+impl<'a, const D: usize> Iterator for ClosestPairIterator<'a, D> {
+    type Item = (u64, &'a Point<D>, &'a Point<D>);
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(item) = self.heap.pop() {
@@ -337,23 +335,29 @@ where  T: Hash + Eq + Copy {
 }
 
 
-pub fn parse_file(f: File) -> Result<Vec<Vec<i64>>, Box<dyn Error>> {
+pub fn parse_file<const D: usize>(f: File) -> Result<Vec<[i64; D]>, Box<dyn Error>> {
     BufReader::new(f)
     .lines()
     .map(|line| {
         let line = line?;
-        line.split(",")
-        .map(|s| s.parse::<i64>().map_err(Box::from))
-        .collect()
+        let numbers:Vec<i64> = line.split(",")
+        .map(|s| s.parse::<i64>())
+        .collect::<Result<_, _>>()?;
+
+        let coords: [i64; D] = numbers.try_into()
+                .map_err(|v: Vec<i64>| {
+                    format!("Dimension mismatch: expected {}, got {}", D, v.len())
+                })?;
+        Ok(coords)
     }).collect()
     
 }
 
-pub fn make_kd_tree(coords: &Vec<Vec<i64>>) -> KDTree {
+pub fn make_kd_tree<const D: usize>(coords: &Vec<[i64; D]>) -> KDTree<D> {
     let mut points = Vec::new();
     for (id, coord) in coords.iter().enumerate() {
         let p = Point{
-            coords: [coord[0], coord[1], coord[2]],
+            coords: *coord,
             id
         };
         points.push(p);
@@ -361,7 +365,7 @@ pub fn make_kd_tree(coords: &Vec<Vec<i64>>) -> KDTree {
     KDTree::new( points)
 }
 
-pub fn part_one(tree: &KDTree, iterations: usize) -> usize {
+pub fn part_one(tree: &KDTree<3>, iterations: usize) -> usize {
     let pairs = ClosestPairIterator::new(&tree);
     let mut uf: UF<[i64; 3]> = UF::new();
 
@@ -371,7 +375,7 @@ pub fn part_one(tree: &KDTree, iterations: usize) -> usize {
     uf.sizes.values().k_largest(3).product()
 }
 
-pub fn part_two(tree: &KDTree, target_size: usize) -> i64 {
+pub fn part_two(tree: &KDTree<3>, target_size: usize) -> i64 {
     let pairs = ClosestPairIterator::new(&tree);
     let mut uf: UF<[i64; 3]> = UF::new();
 

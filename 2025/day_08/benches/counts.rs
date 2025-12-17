@@ -12,7 +12,7 @@ fn criterion() -> Criterion {
 fn bench_part_two(c: &mut Criterion) {
     let f = File::open("data.txt").unwrap();
     let data = parse_file(f).expect("parsing file");
-    let tree = make_kd_tree(&data);
+    let tree = make_kd_tree::<3>(&data);
 
     c.bench_function("make tree", |b| {
         b.iter(|| {
