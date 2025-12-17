@@ -101,18 +101,12 @@ impl<const D: usize> KDTree<D> {
         let dim = depth % D;
         let median_idx = points.len() / 2;
 
-        points.select_nth_unstable_by_key(median_idx, |p| {p.coords[dim]});
-            
-
         let bounding_box = BoundingBox::from_points(points);
-
-        let (left_points, right_points_with_median) = points.split_at_mut(median_idx);
-        let (median_slice, right_points) = right_points_with_median.split_at_mut(1);
-
-        let point = median_slice[0];
+        let (left_points, point, right_points) = points.select_nth_unstable_by_key(median_idx, |p| {p.coords[dim]});
+        
 
         Some(Box::new(KDTreeNode {
-            point,
+            point: *point,
             bounding_box,
             left: Self::build_recursive(left_points, depth+1),
             right: Self::build_recursive(right_points, depth+1)
