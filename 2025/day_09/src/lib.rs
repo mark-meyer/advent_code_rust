@@ -39,23 +39,79 @@ impl Poly {
     }
     fn get_y_idx(&self, y_val:u32) -> usize {
         self.ys.binary_search(&y_val).unwrap()
-    }
-
-        
+    }   
 }
 
 
 pub fn part_one(poly: &[Point]) -> u64 {
-    // we could probably find the dominant points on the outside and import O(n^2)...maybe later
-    let mut max = 0;
-    let n = poly.len();
-    for i in 0..n {
-        for j in (i + 1)..n {
-            let area = (1 + poly[i].x.abs_diff(poly[j].x)) as u64 * (1 + poly[i].y.abs_diff(poly[j].y)) as u64;
-            max = max.max(area);
+    // Only look at the outside frontier of the polygon
+    // each frontier will be ~50 points
+    // so we save outselves the 500 x 500 point O(n^2) loop
+    
+    let mut sorted_pts = poly.to_vec();
+    sorted_pts.sort_unstable_by(|a, b| a.x.cmp(&b.x).then(a.y.cmp(&b.y)));
+    
+
+    // Forward Pass (L -> R)
+    let mut bl_frontier = Vec::with_capacity(60); 
+    let mut tl_frontier = Vec::with_capacity(60);
+    
+    let mut min_y_so_far = u32::MAX;
+    let mut max_y_so_far = u32::MIN;
+
+
+    for p in &sorted_pts {
+        if p.y < min_y_so_far {
+            bl_frontier.push(*p);
+            min_y_so_far = p.y;
+        }
+        if p.y > max_y_so_far {
+            tl_frontier.push(*p);
+            max_y_so_far = p.y;
         }
     }
-    max
+
+
+    // Reverse Pass (R -> L)
+    let mut tr_frontier = Vec::with_capacity(60);
+    let mut br_frontier = Vec::with_capacity(60);
+    
+    min_y_so_far = u32::MAX;
+    max_y_so_far = u32::MIN;
+
+    for p in sorted_pts.iter().rev() {
+        if p.y > max_y_so_far {
+            tr_frontier.push(*p);
+            max_y_so_far = p.y;
+        }
+        if p.y < min_y_so_far {
+            br_frontier.push(*p);
+            min_y_so_far = p.y;
+        }
+    }
+
+    let mut max_area = 0;
+
+
+    for tr in &tr_frontier {
+        for bl in &bl_frontier {
+            if tr.y > bl.y {
+                let area = (1+ (tr.x - bl.x)) as u64 * (1+ (tr.y - bl.y)) as u64;
+                if area > max_area { max_area = area; }
+            }
+        }
+    }
+
+    for tl in &tl_frontier {
+        for br in &br_frontier {
+            if tl.y > br.y {
+                let area = (1 + (br.x - tl.x)) as u64 * (1 + (tl.y - br.y)) as u64;
+                if area > max_area { max_area = area; }
+            }
+        }
+    }
+
+    max_area 
 }
 
 pub fn solve_compression(poly: &[Point]) -> u32 {

@@ -1,7 +1,7 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use std::fs::File;
 
-use day_09::{solve_compression, parse_input};
+use day_09::{solve_compression, parse_input, part_one};
 
 fn criterion() -> Criterion {
     Criterion::default()
@@ -15,6 +15,12 @@ fn bench_part_two(c: &mut Criterion) {
     let f = File::open("data.txt").unwrap();
     let poly = parse_input(f).unwrap();
 
+    c.bench_function("part one", |b| {
+        b.iter(|| {
+            // clone per-iteration so each run starts from same state
+            part_one(black_box(&poly));
+        })
+    });
     c.bench_function("part_two", |b| {
         b.iter(|| {
             // clone per-iteration so each run starts from same state
